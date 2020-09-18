@@ -1,0 +1,25 @@
+{:paths ["src/main"]
+
+ :deps {instaparse/instaparse    {:mvn/version "1.4.10"}
+        borkdude/edamame         {:mvn/version "0.0.11-alpha.14"}
+        meander/epsilon          {:mvn/version "RELEASE"}
+        medley/medley            {:mvn/version "1.3.0"}
+        net.cgrand/macrovich     {:mvn/version "0.2.1"}
+        lambdaisland/regal       {:mvn/version "0.0.89"}}
+
+ :aliases {:clj {:extra-deps {org.clojure/clojure {:mvn/version "1.10.1"}}}
+
+           :cljs {:extra-deps {org.clojure/clojurescript {:mvn/version "1.10.520"}}}
+
+           :dev {:extra-paths ["dev"]}
+
+           :nrepl  {:extra-deps {nrepl/nrepl      {:mvn/version "0.8.2"}}}
+
+           :piggie {:extra-deps {cider/piggieback {:mvn/version "0.5.0"}}}
+
+           :reveal {:extra-deps {vlaaad/reveal {:mvn/version "1.0.130"}}}
+
+
+           :test {:extra-paths ["test"]
+                  :extra-deps {lambdaisland/kaocha {:mvn/version "0.0-541"}
+                               lambdaisland/kaocha-cljs {:mvn/version "0.0-51"}}}}}

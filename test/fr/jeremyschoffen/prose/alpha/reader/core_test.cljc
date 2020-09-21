@@ -15,10 +15,10 @@
 
 
 (def example1
-  "some text and ◊/a comment/◊")
+  "some text and ◊a-tag")
 
 (deftest form->text
-  (is (= "◊/a comment/◊"
+  (is (= "◊a-tag"
          (-> example1
              (c/read-from-string {:keep-comments true})
              second

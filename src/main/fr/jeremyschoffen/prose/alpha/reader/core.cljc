@@ -36,27 +36,6 @@
     [fr.jeremyschoffen.prose.alpha.reader.grammar :as g]
     [fr.jeremyschoffen.prose.alpha.reader.core.error :as error]))
 
-;;----------------------------------------------------------------------------------------------------------------------
-;; Special tags
-;;----------------------------------------------------------------------------------------------------------------------
-(def comment
-  "Type of a special map for comments"
-  ::comment)
-
-
-(def embedded-code
-  "Type of a special map for embedded clojure code"
-  ::embedded-code)
-
-
-(def embedded-value
-  "Type of a special map for an embedded clojure symbol."
-  ::embedded-value)
-
-
-(def special-tags
-  "Set of the different special maps types."
-  #{comment embedded-code embedded-value})
 
 ;;----------------------------------------------------------------------------------------------------------------------
 ;; Parsing and reading
@@ -89,7 +68,7 @@
 
 (macro/replace
   #?(:clj {}
-     :cljs {Exception :default})
+     :cljs {Exception js/Error})
   (defn read-string*
     "Wrapping of clojure(script)'s read-string function for use in our reader."
     [s]
@@ -106,10 +85,6 @@
 ;;----------------------------------------------------------------------------------------------------------------------
 ;; Clojurizing
 ;;----------------------------------------------------------------------------------------------------------------------
-(def ^:dynamic *keep-comments* false)
-(def ^:dynamic *wrap-embeded* false)
-
-
 (declare clojurize)
 
 
@@ -146,6 +121,7 @@
                     v))
                 form))
 
+
 (defn clojurize-mixed
   "The basic content of an embedded code block is a sequence of strings and tags. These tags can't be read by
   the clojure reader.
@@ -167,45 +143,38 @@
   (-> form :content first))
 
 
-(defmethod clojurize* :comment [node]
-  (if-not *keep-comments*
-    ""
-    {:type  comment
-     :value (:content node)}))
+(defmethod clojurize* :comment [_] "")
 
 
 (defmethod clojurize* :embedded-value [form]
-  (let [content (-> form :content first read-string*)]
-    (if *wrap-embeded*
-      {:type embedded-value
-       :value content}
-      content)))
-
-
-(defmethod clojurize* :embedded-code [form]
-  (let [content (clojurize-mixed (:content form))]
-    (if *wrap-embeded*
-      {:type embedded-code
-       :value content}
-      content)))
-
-
-(defmethod clojurize* :tag [form]
-  (seq (mapv clojurize (:content form))))
-
-
-(defmethod clojurize* :tag-name [form]
   (-> form :content first read-string*))
 
 
+(defmethod clojurize* :embedded-code [form]
+  (clojurize-mixed (:content form)))
+
+
+(defmethod clojurize* :tag [form]
+  (->> form
+       :content
+       (into [] (mapcat clojurize))
+       seq))
+
+
+(defmethod clojurize* :tag-name [form]
+  (-> form :content first read-string* vector))
+
+
 (defmethod clojurize* :tag-args-txt [form]
-  (update form
-          :content
-          #(mapv clojurize %)))
+  (->> form
+       :content
+       (mapv clojurize)))
 
 
 (defmethod clojurize* :tag-args-clj [form]
-  (update form :content clojurize-mixed))
+  (-> form
+      :content
+      clojurize-mixed))
 
 
 (defn- add-parse-region-meta [form region]
@@ -229,7 +198,7 @@
 
 (macro/replace
   #?(:clj {}
-     :cljs {Exception :default})
+     :cljs {Exception js/Error})
   (defn read-from-string* [text]
     (try
       (let [parsed (parse text)]
@@ -247,18 +216,11 @@
   Options:
   - `:reader-options`: The options to pass the clojure reader, it's the map that will be passed to
     [[edamame.core/parse-string]]. By default every basic option is allowed except `:read-eval`.
-  - `:keep-comments`: boolean defaulting to false. Indicates to the reader to keep the comments instead of
-    replacing them by an empty-string. (see [[textp.reader.alpha.core/*keep-comments*]])
-  - `:wrap-embedded`: boolean defaulting to false. indicates to the reader to wrap the embeded clojure code/values
-    to be wrapped in a special map instead of being left as is in the result of the read.
-    (see [[textp.reader.alpha.core/*wrap-embeded*]])
   "
   ([text]
    (read-from-string* text))
   ([text opts]
-   (binding [*reader-options* (get opts :reader-options *reader-options*)
-             *keep-comments* (get opts :keep-comments *keep-comments*)
-             *wrap-embeded* (get opts :wrap-embedded *wrap-embeded*)]
+   (binding [*reader-options* (get opts :reader-options *reader-options*)]
      (read-from-string* text))))
 
 
@@ -269,6 +231,7 @@
     form
     (let [{:keys [start-index end-index]} (-> form meta ::parse-region)]
       (subs original start-index end-index))))
+
 
 (clojure.core/comment
   (read-from-string "◊/com/")
@@ -291,18 +254,19 @@
  are equivalent.
 
  ◊div{\\} \\1}")
+  (parse ex1)
+
   (-> ex1
-      (read-from-string {:wrap-embedded true})
+      (read-from-string))
+  (-> ex1
+      (read-from-string)
       second
       (form->text ex1))
   (-> ex1
-      (read-from-string {:wrap-embedded true})
+      (read-from-string)
       (->> (drop 3))
       first
-      :value)
-
-
-
+      (form->text ex1))
 
   (def ex2
     "Hello my name is ◊em{Some}{Name}.
@@ -320,9 +284,14 @@
         {
           the value x: ◊|x|◊
           the value x++: ◊(inc x)◊
-        })◊")
+        })◊
+
+     ◊defn [[x]] {◊div}")
+
+  (read-from-string ex2)
+
   (parse ex2)
-  (-> (read-from-string ex2 {:wrap-embedded true})
+  (-> (read-from-string ex2)
       second
       first
       meta))

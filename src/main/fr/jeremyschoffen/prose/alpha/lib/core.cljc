@@ -1,9 +1,29 @@
-(ns fr.jeremyschoffen.prose.alpha.lib.tags
+(ns fr.jeremyschoffen.prose.alpha.lib.core
   (:require
     #?(:clj [clojure.spec.alpha :as s]
        :cljs [cljs.spec.alpha :as s :include-macros true]))
   #?(:cljs
-     (:require-macros [fr.jeremyschoffen.prose.alpha.lib.tags :refer [def-xml-tag]])))
+     (:require-macros [fr.jeremyschoffen.prose.alpha.lib.core :refer [def-xml-tag]])))
+
+;;----------------------------------------------------------------------------------------------------------------------
+;; Textually silent versions of clojure definitions
+;;----------------------------------------------------------------------------------------------------------------------
+(defmacro def-s [& args]
+  `(do
+     (def ~@args)
+     ""))
+
+(defmacro defn-s [& args]
+  `(do
+     (defn ~@args)
+     ""))
+
+
+(defmacro defmacro-s [& args]
+  `(do
+     (defmacro ~@args)
+     ""))
+
 
 ;;----------------------------------------------------------------------------------------------------------------------
 ;; Tag utils
@@ -71,11 +91,6 @@
 ;;----------------------------------------------------------------------------------------------------------------------
 ;; Default tags
 ;;----------------------------------------------------------------------------------------------------------------------
-
 (def-xml-tag fragment
-  "Tag whose content is meant to be spliced into its parent's content."
-  :prose.alpha/fragment)
-
-(def-xml-tag t
-  "Tag whose role is to hold text."
-  :prose.alpha/text)
+             "Tag whose content is meant to be spliced into its parent's content."
+             :prose.alpha/fragment)

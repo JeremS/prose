@@ -1,4 +1,4 @@
-(ns fr.jeremyschoffen.prose.alpha.eval.clojure)
+(ns fr.jeremyschoffen.prose.alpha.eval.common)
 
 
 (defn wrap-eval-exception
@@ -8,7 +8,7 @@
   (fn [form]
     (try
       (e form)
-      (catch Exception e
+      (catch #?(:clj Exception :cljs js/Error) e
         (throw (ex-info "Error during evaluation."
                         {:form form}
                         e))))))
@@ -27,8 +27,10 @@
 (defn make-eval-ctxt
   "Make a basic evaluation context."
   [eval-form forms]
-  {:eval/forms forms
-   :eval/eval-forms (-> eval-form wrap-eval-exception eval-form->eval-forms)})
+  (let [eval-form (wrap-eval-exception eval-form)]
+    {:eval/forms forms
+     :eval/eval-form eval-form
+     :eval/eval-forms (eval-form->eval-forms eval-form)}))
 
 
 (defn eval-ctxt
@@ -40,7 +42,7 @@
   [{:eval/keys [forms eval-forms] :as ctxt}]
   (let [[ret res] (try
                     [:eval/result (eval-forms forms)]
-                    (catch Exception e
+                    (catch #?(:clj Exception :cljs js/Error) e
                       [:eval/error e]))]
     (assoc ctxt ret res)))
 
@@ -57,10 +59,10 @@
 
 (defn wrap-snapshot-ns [eval-ctxt*]
   "Middleware making sure the current ns stays the same after an evaluation."
-  (fn [ctxt]
-    (let [current-ns (-> *ns* str symbol)
+  (fn [{:eval/keys [eval-form] :as ctxt}]
+    (let [current-ns (eval-form '(-> *ns* str symbol))
           ret (eval-ctxt* ctxt)]
-      (in-ns current-ns)
+      (eval-form (list 'in-ns (list 'quote current-ns)))
       ret)))
 
 
@@ -69,11 +71,11 @@
   ([eval-ctxt*]
    (wrap-eval-in-temp-ns eval-ctxt* (gensym "temp_ns__")))
   ([eval-ctxt* temp-ns]
-   (fn [{:eval/keys [eval-forms] :as ctxt}]
+   (fn [{:eval/keys [eval-form] :as ctxt}]
      (let [res (do
-                 (eval-forms [(list 'ns temp-ns)])
+                 (eval-form (list 'ns temp-ns))
                  (eval-ctxt* ctxt))]
-       (remove-ns temp-ns)
+       (eval-form (list 'remove-ns (list 'quote temp-ns)))
        res))))
 
 

@@ -1,9 +1,7 @@
 (ns fr.jeremyschoffen.prose.alpha.lib.core
   (:require
     #?(:clj [clojure.spec.alpha :as s]
-       :cljs [cljs.spec.alpha :as s :include-macros true]))
-  #?(:cljs
-     (:require-macros [fr.jeremyschoffen.prose.alpha.lib.core :refer [def-xml-tag]])))
+       :cljs [cljs.spec.alpha :as s :include-macros true])))
 
 ;;----------------------------------------------------------------------------------------------------------------------
 ;; Textually silent versions of clojure definitions
@@ -76,7 +74,7 @@
        (apply xml-tag ~keyword-name args#))))
 
 
-(comment
+(comment ; clj only
   (macroexpand-1 '(def-xml-tag div))
 
   (def-xml-tag div)
@@ -91,6 +89,7 @@
 ;;----------------------------------------------------------------------------------------------------------------------
 ;; Default tags
 ;;----------------------------------------------------------------------------------------------------------------------
-(def-xml-tag fragment
-             "Tag whose content is meant to be spliced into its parent's content."
-             :prose.alpha/fragment)
+(defn fragment
+  "Tag whose content is meant to be spliced into its parent's content."
+  [& content]
+  (apply xml-tag :prose.alpha/fragment {} content))

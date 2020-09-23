@@ -157,7 +157,8 @@
   "Create a sci evaluation context.
 
   Same as [[sci.core/init]] with the [[eval-ns]] installed. The goal is to provide code executed by sci
-  an environment that has a namespace equivalent to [[fr.jeremyschoffen.prose.alpha.eval.clojure]] pre-installed."
+  an environment that has a namespace equivalent to [[fr.jeremyschoffen.prose.alpha.eval.clojure]] pre-installed
+  in the namespace `fr.jeremyschoffen.prose.alpha.eval.sci`."
   [opts]
   (let [sci-ctxt (->> opts
                       (medley/deep-merge base-sci-opts)

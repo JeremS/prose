@@ -147,11 +147,14 @@
                  :cljs #{:cljs}
                  :default #{}))
 
-(def namespaces #?(:clj {}
-                   :cljs {'clojure.core {'println println}}))
 
-(def base-sci-opts {:features features
-                    :namespaces namespaces})
+(def features-opt {:features features})
+
+
+(def println-binding #?(:clj {}
+                        :cljs {'clojure.core {'println println}}))
+
+(def println-opt {:namespaces println-binding})
 
 (defn init
   "Create a sci evaluation context.
@@ -161,13 +164,13 @@
   in the namespace `fr.jeremyschoffen.prose.alpha.eval.sci`."
   [opts]
   (let [sci-ctxt (->> opts
-                      (medley/deep-merge base-sci-opts)
+                      (medley/deep-merge features-opt)
                       sci/init)]
     (install-code sci-ctxt eval-ns)
     sci-ctxt))
 
 (comment
-  (def env (init {}))
+  (def env (init println-opt))
 
   (sci/binding [sci/ns @sci/ns
                 sci/out *out*]

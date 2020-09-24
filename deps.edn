@@ -23,6 +23,6 @@
            :reveal {:extra-deps {vlaaad/reveal {:mvn/version "1.0.130"}}}
 
 
-           :test {:extra-paths ["test"]
+           :test {:extra-paths ["test" "test-resources"]
                   :extra-deps {lambdaisland/kaocha {:mvn/version "0.0-541"}
                                lambdaisland/kaocha-cljs {:mvn/version "0.0-51"}}}}}

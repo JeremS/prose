@@ -1,0 +1,17 @@
+◊(require '[fr.jeremyschoffen.prose.alpha.document.sci.tags :as doc])◊
+◊(require '[fr.jeremyschoffen.prose.alpha.lib.core :refer [defn-s xml-tag]])◊
+
+◊(defn-s get-ns []
+   ◊xml-tag [:ns]{namespace: ◊str [*ns*] of type: ◊-> [*ns* type str]})◊
+
+
+
+Some Intro
+
+This doc is evaluated in ◊get-ns
+
+◊doc/insert-doc {sci/section-1.tp}
+
+◊doc/require-doc {sci/section-2.tp}
+
+We are still in ◊get-ns

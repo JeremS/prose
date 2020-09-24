@@ -2,7 +2,7 @@
   (:refer-clojure :exclude [eval])
   (:require
     [medley.core :as medley]
-    [sci.core :as sci]
+    [sci.core :as sci :include-macros true]
     [fr.jeremyschoffen.prose.alpha.eval.common :as eval-common]))
 
 
@@ -148,13 +148,13 @@
                  :default #{}))
 
 
-(def features-opt {:features features})
+(def sci-opt-features {:features features})
 
 
 (def println-binding #?(:clj {}
                         :cljs {'clojure.core {'println println}}))
 
-(def println-opt {:namespaces println-binding})
+(def sci-opt-println {:namespaces println-binding})
 
 (defn init
   "Create a sci evaluation context.
@@ -164,13 +164,13 @@
   in the namespace `fr.jeremyschoffen.prose.alpha.eval.sci`."
   [opts]
   (let [sci-ctxt (->> opts
-                      (medley/deep-merge features-opt)
+                      (medley/deep-merge sci-opt-features)
                       sci/init)]
     (install-code sci-ctxt eval-ns)
     sci-ctxt))
 
 (comment
-  (def env (init println-opt))
+  (def env (init sci-opt-println))
 
   (sci/binding [sci/ns @sci/ns
                 sci/out *out*]
@@ -253,9 +253,11 @@
 
 (comment
   (sci/binding [sci/out *out*]
-    (eval-forms-in-temp-ns '[(+ 1 2 3)
-                             (println *ns*)
-                             (throw (ex-info "some msg" {:toto 1}))]))
+    (eval-forms-in-temp-ns
+      (init sci-opt-println)
+      '[(+ 1 2 3)
+        (println *ns*)
+        (throw (ex-info "some msg" {:toto 1}))]))
 
   (-> *e ex-data) ;; should contains faulty form
   (-> *e ex-cause ex-cause ex-message)
@@ -274,11 +276,13 @@
 
 (comment
   (sci/binding [sci/out *out*]
-    (eval-forms '[(println *ns*)
-                  (ns foobar)
-                  (def inc* inc)
-                  (inc* 3)
-                  (println *ns*)]))
+    (eval-forms
+      (init sci-opt-println)
+      '[(println *ns*)
+        (ns foobar)
+        (def inc* inc)
+        (inc* 3)
+        (println *ns*)]))
 
   (sci/binding [sci/out *out*]
     (eval-forms '[(println *ns*)

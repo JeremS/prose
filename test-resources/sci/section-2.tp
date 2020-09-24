@@ -1,0 +1,6 @@
+◊(require '[fr.jeremyschoffen.prose.alpha.lib.core :refer [defn-s xml-tag]])◊
+
+◊(defn-s get-ns2 []
+   ◊xml-tag [:ns]{namespace: ◊str [*ns*] of type: ◊-> [*ns* type str]})◊
+
+This doc is evaluated in ◊get-ns2

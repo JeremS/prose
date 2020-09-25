@@ -7,14 +7,36 @@
 
 
 ;;----------------------------------------------------------------------------------------------------------------------
-;; Eval inside sci
+;; Addon to default sci ctxt
 ;;----------------------------------------------------------------------------------------------------------------------
+(defn install-code
+  "Run code in an sci context. Used to install code."
+  [sci-ctxt code]
+  (sci/binding [sci/ns @sci/ns]
+    (sci/eval-form sci-ctxt code))
+  sci-ctxt)
+
+
+(def sci-opt-features {:features #?(:clj #{:clj}
+                                    :cljs #{:cljs}
+                                    :default #{})})
+
+(def eval-env-var (sci/new-dynamic-var '*evaluation-env* {:prose.alpha.eval/env :sci}))
+
+(def sci-opt-eval-ns {:namespaces
+                      {'fr.jeremyschoffen.prose.alpha.eval.sci {'*evaluation-env* eval-env-var}}})
+
+
+(def sci-opt-println {:namespaces #?(:clj {}
+                                     :cljs {'clojure.core {'println println}})})
+
+
+
 (def eval-ns
+  "Replica of [[fr.jeremyschoffen.prose.alpha.eval.common]] to ber installed in the sci evaluation context.
+  This way we provide the same evaluation machinery inside of sci as outside."
   '(do
      (ns fr.jeremyschoffen.prose.alpha.eval.sci)
-
-
-     (def ^:dynamic *evaluation-env* {:prose.alpha.eval/env :sci})
 
 
      (defn wrap-eval-form-exception
@@ -183,29 +205,6 @@
         (evaluate eval-form wrap-eval-forms-in-temp-ns forms)))))
 
 
-
-;;----------------------------------------------------------------------------------------------------------------------
-;; Utilities
-;;----------------------------------------------------------------------------------------------------------------------
-(defn install-code [sci-ctxt code]
-  (sci/binding [sci/ns @sci/ns]
-    (sci/eval-form sci-ctxt code))
-  sci-ctxt)
-
-
-(def features #?(:clj #{:clj}
-                 :cljs #{:cljs}
-                 :default #{}))
-
-
-(def sci-opt-features {:features features})
-
-
-(def println-binding #?(:clj {}
-                        :cljs {'clojure.core {'println println}}))
-
-(def sci-opt-println {:namespaces println-binding})
-
 (defn init
   "Create a sci evaluation context.
 
@@ -214,7 +213,7 @@
   in the namespace `fr.jeremyschoffen.prose.alpha.eval.sci`."
   [opts]
   (let [sci-ctxt (->> opts
-                      (medley/deep-merge sci-opt-features)
+                      (medley/deep-merge sci-opt-features sci-opt-eval-ns)
                       sci/init)]
     (install-code sci-ctxt eval-ns)
     sci-ctxt))
@@ -293,6 +292,7 @@
        sci-ctxt->sci-eval
        (wrap-sci-bindings {sci/ns @sci/ns}))))
 
+
 ;;----------------------------------------------------------------------------------------------------------------------
 ;; Eval functions
 ;;----------------------------------------------------------------------------------------------------------------------
@@ -331,6 +331,7 @@
                      (map keyword))
                    (all-ns))
              :foobar))
+
 
 (defn eval-forms-in-temp-ns
   "Evaluate a sequence of forms with sci in a temporary namespace."

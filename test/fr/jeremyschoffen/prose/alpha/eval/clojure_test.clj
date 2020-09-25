@@ -26,7 +26,7 @@
 
 
 (deftest faulty
-  (is (= {:prose.alpha.evaluation/env {:prose.alpha.eval/env :clojure}
+  (is (= {:prose.alpha.evaluation/env {:prose.alpha/env :clojure}
           :prose.alpha.evaluation/form faulty-form}
          (-> faulty-evaluation ex-data)))
 

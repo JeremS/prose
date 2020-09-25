@@ -1,7 +1,14 @@
 (ns fr.jeremyschoffen.prose.alpha.eval.common)
 
 
-(def ^:dynamic *evaluation-env* {:prose.alpha.eval/env :clojure})
+(def ^:dynamic *evaluation-env* {:prose.alpha/env :clojure})
+
+
+(defmacro bind-env
+  "Utility allowing to merge kvs keys to the [[*evaluation-env*]] map."
+  [bindings & body]
+  `(binding [*evaluation-env* (merge *evaluation-env* ~bindings)]
+     ~@body))
 
 
 (defn wrap-eval-form-exception

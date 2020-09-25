@@ -1,15 +1,17 @@
 (ns fr.jeremyschoffen.prose.alpha.document.sci-test
   (:require
-    #?@(:clj [[clojure.test :refer [deftest is]]
+    #?@(:clj [[clojure.test :refer [deftest is are]]
               [clojure.java.io :as io]]
-        :cljs [[cljs.test :refer-macros [deftest is]]])
+        :cljs [[cljs.test :refer-macros [deftest is are]]])
 
     [meander.epsilon :as m :include-macros true]
     [sci.core :as sci :include-macros true]
 
     [fr.jeremyschoffen.prose.alpha.reader.core :as reader]
     [fr.jeremyschoffen.prose.alpha.document.sci.env :as env]
-    [fr.jeremyschoffen.prose.alpha.eval.sci :as eval]))
+    [fr.jeremyschoffen.prose.alpha.eval.common :as eval-common :include-macros true]
+    [fr.jeremyschoffen.prose.alpha.eval.sci :as eval-sci :include-macros true]))
+
 
 #?(:clj
    (do
@@ -38,10 +40,11 @@
 (def ctxt (env/init {}))
 
 
-(def doc (sci/binding [env/load-document-var load-doc]
+(def doc (eval-common/bind-env {:prose.alpha.document/load-doc load-doc}
            (->> "sci/master.tp"
                 load-doc
-                (eval/eval-forms-in-temp-ns ctxt))))
+                (eval-sci/eval-forms-in-temp-ns ctxt))))
+
 
 (def ns-tags (filterv #(and (map? %)
                             (= :ns (:tag %)))
@@ -50,10 +53,9 @@
                                 {:tag :doc :content doc})))
 
 
-(deftest insert-require-dos
-  (is  (m/match ns-tags
-                [?x1 ..2 ?x2 ?x1]
-                true
-
-                _ false)))
-
+(deftest insert-require-docs
+  (let [[first-tag second-tag third-tag fourth-tag] ns-tags]
+    (are [x y] (= x y)
+      first-tag second-tag
+      first-tag fourth-tag)
+    (is (not= first-tag third-tag))))

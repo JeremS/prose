@@ -34,7 +34,7 @@
 
 
 (deftest faulty
-  (is (= {:prose.alpha.evaluation/env {:prose.alpha.eval/env :clojure-sci},
+  (is (= {:prose.alpha.evaluation/env {:prose.alpha/env :clojure-sci},
           :prose.alpha.evaluation/form '(throw (ex-info "Expected error" {:some :expected-data}))}
          (-> faulty-evaluation ex-data)))
 
@@ -80,12 +80,12 @@
 
 
 (deftest faulty'
-  (is (= {:prose.alpha.evaluation/env #:prose.alpha.eval{:env :clojure-sci},
+  (is (= {:prose.alpha.evaluation/env {:prose.alpha/env :clojure-sci},
           :prose.alpha.evaluation/form '(sci-eval/eval-forms-in-temp-ns
                                           (quote [(conj [1 2] 3) (throw (ex-info "Expected error" {:some :expected-data}))]))}
          (-> faulty-evaluation' ex-data)))
 
-  (is (= {:prose.alpha.evaluation/env {:prose.alpha.eval/env :sci},
+  (is (= {:prose.alpha.evaluation/env {:prose.alpha/env :sci},
           :prose.alpha.evaluation/form '(throw (ex-info "Expected error" {:some :expected-data}))}
          (-> faulty-evaluation' ex-cause ex-data (select-keys #{:prose.alpha.evaluation/env
                                                                 :prose.alpha.evaluation/form}))))

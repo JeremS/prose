@@ -5,7 +5,6 @@
     [meander.epsilon :as m]
 
     [fr.jeremyschoffen.prose.alpha.reader.core :as reader]
-    [fr.jeremyschoffen.prose.alpha.document.clojure.env :as env]
     [fr.jeremyschoffen.prose.alpha.eval.common :as eval]))
 
 
@@ -16,7 +15,9 @@
       reader/read-from-string))
 
 
-(def doc (binding [env/*load-document* load-doc]
+
+(def doc (binding [eval/*evaluation-env* (assoc eval/*evaluation-env*
+                                           :prose.alpha.document/load-doc load-doc)]
            (-> "clojure/master.tp"
                load-doc
                eval/eval-forms-in-temp-ns)))

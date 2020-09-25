@@ -1,17 +1,21 @@
 (ns fr.jeremyschoffen.prose.alpha.document.clojure.tags
   (:require
-    [fr.jeremyschoffen.prose.alpha.document.clojure.env :as env]
     [fr.jeremyschoffen.prose.alpha.eval.common :as eval]))
 
 
+(defn- get-load-doc []
+  (:prose.alpha.document/load-doc eval/*evaluation-env*))
+
+
 (defn- load* [path form error-msg]
-  (try
-    (env/*load-document* path)
-    (catch Exception e
-      (throw (ex-info error-msg
-                      {:path path
-                       :form form}
-                      e)))))
+  (let [load-doc (get-load-doc)]
+    (try
+      (load-doc path)
+      (catch Exception e
+        (throw (ex-info error-msg
+                        {:path path
+                         :form form}
+                        e))))))
 
 
 (defmacro insert-doc [path]
@@ -38,11 +42,14 @@
   (require '[clojure.java.io :as io])
   (require '[fr.jeremyschoffen.prose.alpha.reader.core :as reader])
 
-  (binding [env/*load-document* (fn [path]
-                                  (-> path
-                                      io/resource
-                                      slurp
-                                      reader/read-from-string))]
+  (def load-doc (fn [path]
+                  (-> path
+                      io/resource
+                      slurp
+                      reader/read-from-string)))
+
+  (binding [eval/*evaluation-env* (assoc eval/*evaluation-env*
+                                    :prose.alpha.document/load-doc load-doc)]
     (-> "clojure/master.tp"
-        env/*load-document*
+        load-doc
         eval/eval-forms-in-temp-ns)))

@@ -21,7 +21,8 @@
                                     :cljs #{:cljs}
                                     :default #{})})
 
-(def eval-env-var (sci/new-dynamic-var '*evaluation-env* {:prose.alpha.eval/env :sci}))
+(def eval-env-var (sci/new-dynamic-var '*evaluation-env* {:prose.alpha/env :sci}))
+
 
 (def sci-opt-eval-ns {:namespaces
                       {'fr.jeremyschoffen.prose.alpha.eval.sci {'*evaluation-env* eval-env-var}}})
@@ -37,6 +38,11 @@
   This way we provide the same evaluation machinery inside of sci as outside."
   '(do
      (ns fr.jeremyschoffen.prose.alpha.eval.sci)
+
+
+     (defmacro bind-env [bindings & body]
+       `(binding [*evaluation-env* (merge *evaluation-env* ~bindings)]
+          ~@body))
 
 
      (defn wrap-eval-form-exception
@@ -218,8 +224,14 @@
     (install-code sci-ctxt eval-ns)
     sci-ctxt))
 
+
 (comment
   (def env (init sci-opt-println))
+
+  (sci/binding [sci/ns @sci/ns]
+    (sci/eval-form env '(do
+                          (in-ns 'fr.jeremyschoffen.prose.alpha.eval.sci)
+                          *evaluation-env*)))
 
   (sci/binding [sci/ns @sci/ns
                 sci/out *out*]
@@ -279,20 +291,6 @@
     (sci/with-bindings bindings
       (eval-fn form))))
 
-
-(defn make-sci-eval
-  "Make an eval function from a sci context.
-
-  The result function is a function of one argument, a form to be evaluated. It automatically binds
-  [[sci.core/ns]] to its dereferenced value."
-  ([]
-   (make-sci-eval (init nil)))
-  ([sci-ctxt]
-   (-> sci-ctxt
-       sci-ctxt->sci-eval
-       (wrap-sci-bindings {sci/ns @sci/ns}))))
-
-
 ;;----------------------------------------------------------------------------------------------------------------------
 ;; Eval functions
 ;;----------------------------------------------------------------------------------------------------------------------
@@ -301,10 +299,12 @@
   ([forms]
    (eval-forms (init nil) forms))
   ([sci-ctxt forms]
-   (let [ef (make-sci-eval sci-ctxt)]
-     (binding [eval-common/*evaluation-env* (assoc eval-common/*evaluation-env*
-                                              :prose.alpha.eval/env :clojure-sci)]
-       (eval-common/eval-forms ef forms)))))
+   (let [ef (sci-ctxt->sci-eval sci-ctxt)]
+     (eval-common/bind-env {:prose.alpha/env :clojure-sci}
+       (sci/binding [sci/ns @sci/ns
+                     eval-env-var (merge @eval-env-var
+                                         (dissoc eval-common/*evaluation-env* :prose.alpha/env))]
+         (eval-common/eval-forms ef forms))))))
 
 
 (comment
@@ -338,10 +338,12 @@
   ([forms]
    (eval-forms-in-temp-ns (init nil) forms))
   ([sci-ctxt forms]
-   (let [ef (make-sci-eval sci-ctxt)]
-     (binding [eval-common/*evaluation-env* (assoc eval-common/*evaluation-env*
-                                              :prose.alpha.eval/env :clojure-sci)]
-       (eval-common/eval-forms-in-temp-ns ef forms)))))
+   (let [ef (sci-ctxt->sci-eval sci-ctxt)]
+     (eval-common/bind-env {:prose.alpha/env :clojure-sci}
+       (sci/binding [sci/ns @sci/ns
+                     eval-env-var (merge @eval-env-var
+                                         (dissoc eval-common/*evaluation-env* :prose.alpha/env))]
+         (eval-common/eval-forms-in-temp-ns ef forms))))))
 
 (comment
   (sci/binding [sci/out *out*]

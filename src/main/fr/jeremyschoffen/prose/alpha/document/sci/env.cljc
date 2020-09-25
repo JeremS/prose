@@ -13,18 +13,8 @@
 ;;----------------------------------------------------------------------------------------------------------------------
 ;; Environment vars
 ;;----------------------------------------------------------------------------------------------------------------------
-(def load-document-var
-  (sci/new-dynamic-var '*load-document*
-                       (fn [& _]
-                         (throw (ex-info "Unbound load document function." {})))))
+(def sci-opt-env-ns {:namespaces (bindings/make-ns-bindings fr.jeremyschoffen.prose.alpha.lib.core)})
 
-(def input-var
-  (sci/new-dynamic-var '*input* {}))
-
-(def sci-opt-env-ns {:namespaces
-                     (merge {'fr.jeremyschoffen.prose.alpha.document.sci.env {'*load-document* load-document-var
-                                                                              '*input* input-var}}
-                            (bindings/make-ns-bindings fr.jeremyschoffen.prose.alpha.lib.core))})
 
 (def sci-opt-println eval/sci-opt-println)
 
@@ -33,18 +23,22 @@
   '(do
      (ns fr.jeremyschoffen.prose.alpha.document.sci.tags
        (:require
-         [fr.jeremyschoffen.prose.alpha.document.sci.env :as env]
          [fr.jeremyschoffen.prose.alpha.eval.sci :as eval]))
 
 
+     (defn- get-load-doc []
+       (:prose.alpha.document/load-doc eval/*evaluation-env*))
+
+
      (defn- load* [path form error-msg]
-       (try
-         (env/*load-document* path)
-         (catch #?(:clj Exception :cljs js/Error) e
-           (throw (ex-info error-msg
-                           {:path path
-                            :form form}
-                           e)))))
+       (let [load-doc (get-load-doc)]
+         (try
+           (load-doc path)
+           (catch #?(:clj Exception :cljs js/Error) e
+             (throw (ex-info error-msg
+                             {:path path
+                              :form form}
+                             e))))))
 
 
      (defmacro insert-doc [path]
@@ -71,17 +65,17 @@
   (require '[clojure.java.io :as io])
   (require '[fr.jeremyschoffen.prose.alpha.reader.core :as reader])
 
-  (let [load-doc (fn [path]
-                   (-> path
-                       io/resource
-                       slurp
-                       reader/read-from-string))]
-    (sci/binding [load-document-var (fn [path]
-                                      (-> path
-                                          io/resource
-                                          slurp
-                                          reader/read-from-string))]
-      (->> "sci/master.tp"
-           load-doc
-           (eval/eval-forms-in-temp-ns ctxt)))))
+
+
+  (def load-doc (fn [path]
+                  (-> path
+                      io/resource
+                      slurp
+                      reader/read-from-string)))
+
+  (sci/binding [eval/eval-env-var (assoc @eval/eval-env-var
+                                    :prose.alpha.document/load-doc load-doc)]
+    (->> "sci/master.tp"
+         load-doc
+         (eval/eval-forms-in-temp-ns ctxt))))
 

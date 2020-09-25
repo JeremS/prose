@@ -4,25 +4,33 @@
     [fr.jeremyschoffen.prose.alpha.eval.common :as eval :include-macros true]))
 
 
-(deftest evil
-  (testing "normal eval"
-    (let [program '[(conj [1 2] 3)
-                    (+ 1 2 3)]
-          res (eval/eval-forms-in-temp-ns program)]
+(def program-1 '[(conj [1 2] 3) (+ 1 2 3)])
 
-      (is (= res
-             [(conj [1 2] 3)
-              (+ 1 2 3)]))))
+(def evaluation-1 (eval/eval-forms program-1))
 
-
-  (testing "Exception raised"
-    (let [faulty-form '(throw (Exception. "Random exception"))
-          faulty-program ['(conj [1 2] 3)
-                          faulty-form]
-          res (try
-                (eval/eval-forms-in-temp-ns faulty-program)
-                (catch Exception e e))]
+(deftest p1
+  (is (= evaluation-1
+         [(conj [1 2] 3)
+          (+ 1 2 3)])))
 
 
-      (is (= (-> res ex-data)
-             {:form faulty-form})))))
+;;----------------------------------------------------------------------------------------------------------------------
+(def faulty-form '(throw (ex-info "Expected error" {:some :expected-data})))
+(def faulty-program ['(conj [1 2] 3)
+                     faulty-form])
+
+(def faulty-evaluation
+  (try
+    (eval/eval-forms faulty-program)
+    (catch Exception e e)))
+
+
+(deftest faulty
+  (is (= {:prose.alpha.evaluation/env {:prose.alpha.eval/env :clojure}
+          :prose.alpha.evaluation/form faulty-form}
+         (-> faulty-evaluation ex-data)))
+
+
+  (is (= (-> faulty-evaluation ex-cause ex-data)
+         {:some :expected-data})))
+

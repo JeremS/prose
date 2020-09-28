@@ -20,9 +20,9 @@
 
    :cljs
    (do
-     (def resource {"sci/master.tp" "test-resources/sci/master.tp"
-                    "sci/section-1.tp" "test-resources/sci/section-1.tp"
-                    "sci/section-2.tp" "test-resources/sci/section-2.tp"})
+     (def resource {"complex-doc/master.tp" "test-resources/complex-doc/master.tp"
+                    "complex-doc/section-1.tp" "test-resources/complex-doc/section-1.tp"
+                    "complex-doc/section-2.tp" "test-resources/complex-doc/section-2.tp"})
 
      (def fs (js/require "fs"))
 
@@ -42,7 +42,7 @@
 
 (def doc (eval-common/bind-env {:prose.alpha.document/load-doc load-doc
                                 :prose.alpha.document/eval-doc (partial eval-sci/eval-forms-in-temp-ns ctxt)}
-           (->> "sci/master.tp"
+           (->> "complex-doc/master.tp"
                 load-doc
                 (eval-sci/eval-forms-in-temp-ns ctxt))))
 

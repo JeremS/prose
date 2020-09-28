@@ -17,11 +17,11 @@
                         :as ctxt}]
   (try
     (eval-common/bind-env {:prose.alpha.document/path path}
-      (load-doc path))
-    (catch Exception e
-      (throw (ex-info error-msg
-                      (dissoc ctxt :error-msg)
-                      e)))))
+                          (load-doc path))
+    (catch #?@(:clj [Exception e] :cljs [js/Error e])
+           (throw (ex-info error-msg
+                           (dissoc ctxt :error-msg)
+                           e)))))
 
 
 (defmacro insert-doc [path]
@@ -62,6 +62,6 @@
 
   (eval-common/bind-env {:prose.alpha.document/load-doc load-doc
                          :prose.alpha.document/eval-doc eval-common/eval-forms-in-temp-ns}
-    (-> "clojure/master.tp"
-        load-doc
-        eval-common/eval-forms-in-temp-ns)))
+                        (-> "complex-doc/master.tp"
+                            load-doc
+                            eval-common/eval-forms-in-temp-ns)))

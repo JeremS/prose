@@ -8,8 +8,8 @@ Some Intro
 
 This doc is evaluated in ◊get-ns
 
-◊doc/insert-doc {clojure/section-1.tp}
+◊doc/insert-doc {complex-doc/section-1.tp}
 
-◊doc/require-doc {clojure/section-2.tp}
+◊doc/require-doc {complex-doc/section-2.tp}
 
 We are still in ◊get-ns

@@ -40,6 +40,16 @@
      (ns fr.jeremyschoffen.prose.alpha.eval.sci)
 
 
+     (defn get-env
+       ([]
+        *evaluation-env*)
+       ([key]
+        (or (get *evaluation-env* key)
+            (throw (ex-info "key not found in evaluation env."
+                            {:prose.alpha.evaluation/env *evaluation-env*
+                             :prose.alpha.evaluation/env-key key})))))
+
+
      (defmacro bind-env [bindings & body]
        `(binding [*evaluation-env* (merge *evaluation-env* ~bindings)]
           ~@body))
@@ -339,6 +349,7 @@
    (eval-forms-in-temp-ns (init nil) forms))
   ([sci-ctxt forms]
    (let [ef (sci-ctxt->sci-eval sci-ctxt)]
+     (println "Evaluating from outside" eval-common/*evaluation-env*)
      (eval-common/bind-env {:prose.alpha/env :clojure-sci}
        (sci/binding [sci/ns @sci/ns
                      eval-env-var (merge @eval-env-var

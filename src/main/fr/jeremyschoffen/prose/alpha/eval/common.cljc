@@ -3,6 +3,15 @@
 
 (def ^:dynamic *evaluation-env* {:prose.alpha/env :clojure})
 
+(defn get-env
+  ([]
+   *evaluation-env*)
+  ([key]
+   (or (get *evaluation-env* key)
+       (throw (ex-info "key not found in evaluation env."
+                       {:prose.alpha.evaluation/env *evaluation-env*
+                        :prose.alpha.evaluation/env-key key})))))
+
 
 (defmacro bind-env
   "Utility allowing to merge kvs keys to the [[*evaluation-env*]] map."

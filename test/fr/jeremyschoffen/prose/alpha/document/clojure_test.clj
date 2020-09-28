@@ -17,7 +17,8 @@
 
 
 (def doc (binding [eval/*evaluation-env* (assoc eval/*evaluation-env*
-                                           :prose.alpha.document/load-doc load-doc)]
+                                           :prose.alpha.document/load-doc load-doc
+                                           :prose.alpha.document/eval-doc eval/eval-forms-in-temp-ns)]
            (-> "clojure/master.tp"
                load-doc
                eval/eval-forms-in-temp-ns)))

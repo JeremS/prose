@@ -40,7 +40,8 @@
 (def ctxt (env/init {}))
 
 
-(def doc (eval-common/bind-env {:prose.alpha.document/load-doc load-doc}
+(def doc (eval-common/bind-env {:prose.alpha.document/load-doc load-doc
+                                :prose.alpha.document/eval-doc (partial eval-sci/eval-forms-in-temp-ns ctxt)}
            (->> "sci/master.tp"
                 load-doc
                 (eval-sci/eval-forms-in-temp-ns ctxt))))

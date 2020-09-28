@@ -11,7 +11,3 @@ clj-test opts="":
 
 cljs-test opts="":
 	clojure -A:clj:cljs:test -m kaocha.runner unit-cljs {{opts}}
-
-
-toto opts:
-	echo "toto {{opts}}"

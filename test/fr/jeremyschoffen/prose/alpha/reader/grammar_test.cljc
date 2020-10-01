@@ -9,294 +9,152 @@
     [lambdaisland.regal :as regal]))
 
 
-(defn make-insta-rule-parser-with-lookahead [n regex ending]
-  (let [ending-c (if (string? ending)
-                   (instac/string ending)
-                   (instac/regexp ending))
-        grammar {n        (instac/cat (instac/nt :regex-r) ending-c)
-                 :regex-r (instac/regexp regex)}]
-    (insta/parser grammar :start n)))
+;;----------------------------------------------------------------------------------------------------------------------
+;; Lexer
+;;----------------------------------------------------------------------------------------------------------------------
+(deftest plain-text-r
+  (is (= (re-matches g/plain-text "Some text @# [({")
+         "Some text @# [({"))
+
+  (is (nil? (re-matches g/plain-text "Some text ◊"))))
 
 
-;; ---------------------------------------------------------------------------------------------------------------------
-;; Text free
-;; ---------------------------------------------------------------------------------------------------------------------
-(deftest plain-text-test
-  (testing "Recognizes any text except for the chararcters '◊' and '\\'"
-    (are [x y] (= (re-matches g/plain-text x) y)
-               "abcd" "abcd"
-               "abcd◊" nil
-               "abcd\\e" nil)))
-
-
-;; ---------------------------------------------------------------------------------------------------------------------
-;; Text verbatim
-;; ---------------------------------------------------------------------------------------------------------------------
-(def verbatim-p (make-insta-rule-parser-with-lookahead :p g/text-verbatim "!◊"))
-
-(deftest text-verbatim-test
-  (testing "Accepts anny text until finished with \"!◊\"."
-    (is (= (verbatim-p "Some text contaning ◊.!◊")
-           [:p [:regex-r "Some text contaning ◊."] "!◊"]))
-
-    (is (insta/failure? (verbatim-p "Some text contaning ◊.")))))
-
-
-;; ---------------------------------------------------------------------------------------------------------------------
-;; Text comment
-;; ---------------------------------------------------------------------------------------------------------------------
-(def comment-p (make-insta-rule-parser-with-lookahead :p g/text-comment "/◊"))
-
-(deftest text-comment-test
-  (testing "Accepts anny text until finished with \"/◊\"."
-    (is (= (comment-p "Some text contaning ◊./◊")
-           [:p [:regex-r "Some text contaning ◊."] "/◊"]))
-
-    (is (insta/failure? (comment-p "Some text contaning ◊.")))))
-
-
-;; ---------------------------------------------------------------------------------------------------------------------
-;; Text symbol
-;; ---------------------------------------------------------------------------------------------------------------------
-(deftest text-symbol-test
+(deftest text-symbol-r
   (testing "We can match simple symbols."
-    (are [x y] (= (re-matches g/text-symbol x) y)
+    (are [x y] (= (re-matches g/symbol-text x) y)
                "simple-sym" ["simple-sym" nil "simple-sym"]
                "1wrong-sym" nil))
 
   (testing "We can match namespace qualified symbols."
-    (are [x y] (= (re-matches g/text-symbol x) y)
+    (are [x y] (= (re-matches g/symbol-text x) y)
                "some.ns/simple-sym" ["some.ns/simple-sym" "some.ns" "simple-sym"]
                "v3ry.3e#rd/sym23" ["v3ry.3e#rd/sym23" "v3ry.3e#rd" "sym23"]
                "#Wrong.ns/good-sym" nil)))
 
 
+(deftest verbatim-text-r
+  (is (= (re-matches g/verbatim-text "some code inside parens, allowed: () [] {}")
+         "some code inside parens, allowed: () [] {}"))
 
-;; ---------------------------------------------------------------------------------------------------------------------
-;; Text embeded value
-;; ---------------------------------------------------------------------------------------------------------------------
-(def text-e-value-p (make-insta-rule-parser-with-lookahead :p g/text-e-value "|◊"))
-
-(deftest text-e-value-test
-  (testing "We can match simple symbols terminated by \"|◊\"."
-    (is (= (text-e-value-p "simple-sym|◊")
-           [:p [:regex-r "simple-sym"] "|◊"]))
-
-    (is (insta/failure? (text-e-value-p "good-sym-not-terminated")))
-
-    (is (insta/failure? (text-e-value-p "#wrong-sym|◊"))))
+  (is (nil? (re-matches g/verbatim-text "some dangling \""))))
 
 
-  (testing "We can match namespace qualified symbols terminated by \"|◊\"."
-    (is (= (text-e-value-p "some.ns/simple-sym|◊")
-           [:p [:regex-r "some.ns/simple-sym"] "|◊"]))
-    (is (insta/failure? (text-e-value-p "some/ns/good-sym-not-terminated")))
+(deftest clojure-strting-r
+  (is (= (re-matches g/clojure-string "\"some code inside parens, allowed: () [] {}\\\" \"")
+         "\"some code inside parens, allowed: () [] {}\\\" \""))
 
-    (is (insta/failure? (text-e-value-p "#wrong/sym|◊")))))
-
-
-;; ---------------------------------------------------------------------------------------------------------------------
-;; Text embedded code
-;; ---------------------------------------------------------------------------------------------------------------------
-(def text-e-code-p (make-insta-rule-parser-with-lookahead :p
-                                                          g/text-e-code
-                                                          (regal/regex g/end-embeded-code)))
-
-(deftest text-e-code-test
-  (testing "The text inside embedded clojure code is parsed until \"◊\" or \")◊\""
-    (is (= (text-e-code-p "(+ 1 2 3)◊")
-           [:p [:regex-r "(+ 1 2 3"] ")◊"]))
-
-    (is (= (text-e-code-p "(+ 1 2 3◊")
-           [:p [:regex-r "(+ 1 2 3"] "◊"]))))
+  (is (nil? (re-matches g/verbatim-text "\"some dangling \"\""))))
 
 
-;; ---------------------------------------------------------------------------------------------------------------------
-;; Text clojure arg to tags
-;; ---------------------------------------------------------------------------------------------------------------------
-(deftest text-t-clj-test
-  (testing "Inside clojure args to tags any text is permitted but the chars \" ◊ [ ] except when escaped."
-    (are [x y] (= (re-matches g/text-t-clj x) y)
-               "abc" "abc"
-               "abc \\\" \\◊ \\[ \\]" "abc \\\" \\◊ \\[ \\]"
-               "abc ◊" nil)))
+(deftest clojure-call-text-r
+  (is (= (re-matches g/clojure-call-text "some code inside parens, allowed: [] {}")
+         "some code inside parens, allowed: [] {}"))
+
+  (is (nil? (re-matches g/clojure-call-text "f1 (f2")))
+  (is (nil? (re-matches g/clojure-call-text "f )")))
+  (is (nil? (re-matches g/clojure-call-text "str \"1\"")))
+  (is (nil? (re-matches g/clojure-call-text "str ◊\"◊\""))))
+
+
+(deftest tag-clj-arg-text-r
+  (is (= (re-matches g/tag-clj-arg-text "some code inside brackets, allowed; () {}")
+         "some code inside brackets, allowed; () {}"))
+
+  (is (nil? (re-matches g/tag-clj-arg-text "f1 [f2")))
+  (is (nil? (re-matches g/tag-clj-arg-text "f ]")))
+  (is (nil? (re-matches g/tag-clj-arg-text "str \"1\"")))
+  (is (nil? (re-matches g/tag-clj-arg-text "str ◊\"◊\""))))
+
+
+(deftest tag-text-arg-text-r
+  (is (= (re-matches g/tag-text-arg-text "some text inside braces, allowed: () [] \"")
+         "some text inside braces, allowed: () [] \""))
+
+  (is (nil? (re-matches g/tag-text-arg-text "f1 {f2")))
+  (is (nil? (re-matches g/tag-text-arg-text "f }")))
+  (is (nil? (re-matches g/tag-text-arg-text "str ◊\"◊\""))))
 
 
 ;; ---------------------------------------------------------------------------------------------------------------------
-;; Text clojure string
+;; Grammar
 ;; ---------------------------------------------------------------------------------------------------------------------
-(deftest text-t-clj-str-test
-  (testing "Inside clojure strings in clj args to tags any text is permitted but the char \" except when escaped."
-    (are [x y] (= (re-matches g/text-t-clj-str x) y)
-               "abc"       "abc"
-               "abc ◊ [ ]" "abc ◊ [ ]"
-               "abc \\\""  "abc \\\""
-               "abc \""    nil)))
+(deftest simple-usages
+  (testing "Verbatim"
+    (testing "Result in text treated as non special."
+      (is (= (g/parser "some text ◊\"◊ \" some text after")
+             '{:tag :doc, :content ("some text " "◊ " " some text after")})))
+
+    (testing "We can escaped characters notably double quotes in verbatim text"
+      (let [res (->> "begin-v ◊\"◊ some \"verbatim text\" end-v"
+                     g/parser
+                     :content
+                     (apply str))
+
+            res2 (->> "begin-v ◊\"◊ some \\\"verbatim text\" end-v"
+                      g/parser
+                      :content
+                      (apply str))]
 
 
-;; ---------------------------------------------------------------------------------------------------------------------
-;; Text string arg to tags
-;; ---------------------------------------------------------------------------------------------------------------------
-(deftest text-t-txt-test
-  (testing "Inside clojure strings args to tags any text is permitted but the chars ◊ } and \\"
-    (are [x y] (= (re-matches g/tag-plain-text x) y)
-               "abcd" "abcd"
-               "abcd◊" nil
-               "abcd\\e" nil
-               "abc}de" nil)))
+        (testing "Here the non escaped quotes close the verbatim early"
+          (is (=  res
+                  "begin-v ◊ some verbatim text\" end-v")))
+
+        (testing "Here the escaped quotes do not close the verbatim early the quotes stay in the middle of the verbatim text"
+          (is (=  res2
+                  "begin-v ◊ some \"verbatim text end-v")))
+
+        res)))
 
 
-
-(def simple-text
-  "Some simple text.")
-
-(defn vec->text [v]
-  (clojure.string/join "\n" v))
-
-(def simple-text-with-comment
-  (vec->text
-    ["Some simple text."
-     "◊/A comment "
-     "on several lines."
-     "/◊"
-     "Some other text."]))
+  (testing "Symbol use"
+    (is (= (g/parser "some text ◊|sym  some other text")
+           '{:tag :doc, :content ("some text " {:tag :symbol-use, :content ("sym")} "  some other text")})))
 
 
-(def simple-text-with-verbatim
-  (vec->text
-    ["Some simple text."
-     "◊!Some ◊ verbatim ◊stuff[]{}!◊"
-     "Some other text."]))
+  (testing "Clojure call"
+    (is (= (->> "◊(str v1 \"a \\\" b\")" g/parser :content first :content (apply str))
+           "(str v1 \"a \\\" b\")")))
 
 
-(def simple-text-with-embeded-code
-  (vec->text
-    ["Some simple text."
-     "◊(+ 1 2 3)◊"
-     "Some other text."]))
-
-(def simple-text-with-embeded-value
-  (vec->text
-    ["Some simple text."
-     "◊|@an-atom|◊"
-     "Some other text."]))
-
-(def simple-tag
-  "Some text with an emphased ◊em[:class \"class\"]{word}. End.")
-
-
-(deftest parsing-simple-blocks
-  (testing "We can parse simple text."
-    (is (= (g/parser simple-text)
-           '{:tag :doc, :content ("Some simple text.")})))
-
-  (testing "We can parse comments."
-    (is (= (g/parser simple-text-with-comment)
+  (testing "Tag function"
+    (is (= (g/parser "some text ◊div [:classes [:c1 :c2]] {some text in div ◊div} other")
            '{:tag :doc,
-             :content ("Some simple text.\n"
-                        {:tag :comment, :content ("A comment \non several lines.\n")}
-                        "\nSome other text.")})))
-
-  (testing "We can parse verbatim text."
-    (is (= (g/parser simple-text-with-verbatim)
-           '{:tag :doc,
-             :content ("Some simple text.\n"
-                        {:tag :verbatim, :content ("Some ◊ verbatim ◊stuff[]{}")}
-                        "\nSome other text.")})))
-
-  (testing "We can parse embedded code."
-    (is (= (g/parser simple-text-with-embeded-code)
-           '{:tag :doc, :content ("Some simple text.\n"
-                                   {:tag :embedded-code, :content ("(" "+ 1 2 3" ")")}
-                                   "\nSome other text.")})))
-
-  (testing "We can parse embedded values."
-    (is (= (g/parser simple-text-with-embeded-value)
-           '{:tag :doc, :content ("Some simple text.\n"
-                                   {:tag :embedded-value, :content ("@an-atom")}
-                                   "\nSome other text.")})))
-  (testing "We can parse tags."
-    (is (= (g/parser simple-tag)
-           '{:tag :doc,
-             :content ("Some text with an emphased "
+             :content ("some text "
                         {:tag :tag,
-                         :content ({:tag :tag-name, :content ("em")}
-                                   {:tag :tag-args-clj, :content ("[" ":class " "\"" "class" "\"" "]")}
-                                   {:tag :tag-args-txt, :content ("word")})}
-                        ". End.")}))))
+                         :content ({:tag :tag-name, :content ("div")}
+                                   {:tag :tag-clj-arg, :content ("[" ":classes " "[" ":c1 :c2" "]" "]")}
+                                   {:tag :tag-text-arg, :content ("some text in div " {:tag :tag, :content ({:tag :tag-name, :content ("div")})})})}
+                        " other")}))))
 
 
-(deftest escaping
-  (testing "Escaping in tags"
-    (let [t1 "◊t{Some text with an escaped \\}.}"
-          t2 "◊t{Some text without an escaped }.}"
-          t3 "◊t[:some-param \"]\"]{Some text with bracket in a string in args.}"
-          t4 "◊t[:some-param \\]]{Some text with escaped bracket in args.}"]
-      (are [x y] (= (g/parser x) y)
-                 t1 '{:tag :doc,
-                      :content ({:tag :tag,
-                                 :content ({:tag :tag-name, :content ("t")}
-                                           {:tag :tag-args-txt, :content ("Some text with an escaped " "}" ".")})})}
-                 t2 '{:tag :doc,
-                      :content ({:tag :tag,
-                                 :content ({:tag :tag-name, :content ("t")}
-                                           {:tag :tag-args-txt, :content ("Some text without an escaped ")})}
-                                ".}")}
-                 t3 '{:tag :doc,
-                      :content ({:tag :tag,
-                                 :content ({:tag :tag-name, :content ("t")}
-                                           {:tag :tag-args-clj, :content ("[" ":some-param " "\"" "]" "\"" "]")}
-                                           {:tag :tag-args-txt, :content ("Some text with bracket in a string in args.")})})}
-                 t4 '{:tag :doc,
-                      :content ({:tag :tag,
-                                 :content ({:tag :tag-name, :content ("t")}
-                                           {:tag :tag-args-clj, :content ("[" ":some-param \\]" "]")}
-                                           {:tag :tag-args-txt, :content ("Some text with escaped bracket in args.")})})}))))
-
-
-(defn parse-first [x]
-  (-> x
-      g/parser
-      (-> :content first)))
-
-
-(def simple-addition "◊(def x (+ 1 2))◊")
-(def simple-addition-parse (parse-first simple-addition))
-
-(def simple-embedding "◊|x|◊")
-(def simple-embedding-parse (parse-first simple-embedding))
+(deftest recursive-use
+  (is (= (g/parser "Some text ◊div { in div ◊\"◊\" ◊div [:a ◊(str \"a\\\"b\")] }")
+         '{:tag :doc,
+           :content ("Some text "
+                      {:tag :tag,
+                       :content ({:tag :tag-name, :content ("div")}
+                                 {:tag :tag-text-arg,
+                                  :content (" in div "
+                                             "◊"
+                                             " "
+                                             {:tag :tag,
+                                              :content ({:tag :tag-name, :content ("div")}
+                                                        {:tag :tag-clj-arg,
+                                                         :content ("["
+                                                                    ":a "
+                                                                    {:tag :clojure-call, :content ("(" "str " "\"a\\\"b\"" ")")}
+                                                                    "]")})}
+                                             " ")})})})))
 
 
 
-(def twisted-embedding
-  (vec->text
-    ["◊(defn template [v]"
-     "   ◊div {"
-     (str "     " simple-addition)
-     (str "     sufixing with: " simple-embedding)
-     "    }"
-     ")◊"]))
+(deftest error-cases
+  (testing "Dangling ◊ are not allowed"
+    (is (insta/failure? (g/parser "some text ◊ some other text"))))
 
-(deftest embedding
-  (testing "We can embedd ad nauseam."
-    (is (= #{simple-addition-parse
-             simple-embedding-parse}
 
-           (set
-             (m/search
-               (parse-first twisted-embedding)
-               {:tag :embedded-code
-                :content (m/scan {:tag :tag
-                                  :content (m/scan {:tag :tag-args-txt
-                                                    :content (m/scan (m/pred map? ?c))})})}
+  (testing "Dangling quotes"
+    (is (insta/failure? (g/parser "some text ◊(str \"aaa\"\")")))
 
-               ?c))))))
-
-;; TODO: see if there is a way to enforce some error that are glossed over by the parser back-tracking
-(deftest anticipated-failures
-  (testing "The parser doesn't allow single diamonds."
-    (is (insta/failure? (g/parser "◊ toto"))))
-
-  #_(testing "The parser wants tag args to be closed"
-      (g/parser "◊div { some stuff")))
-
+    #_(is (insta/failure? (g/parser "◊div[:class \"c1 c2\" \"]")))))

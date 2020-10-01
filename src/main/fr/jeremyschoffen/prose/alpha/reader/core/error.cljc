@@ -8,54 +8,59 @@
 ;; TODO: See how it might be possible when displaying an error to show the starting position of a grammatical rule failing instead of just the end.
 ;; TODO: try and use edamame to get more precise as to where a reding error occurred
 (def error-msgs
-  {g/plain-text
-   "The parser expected plain text without any \"◊\",\"\\\"."
+  {g/special-char
+   "the special character"
 
-   g/escaping-char
-   "The parser expected a backslash here."
+   g/pipe-char
+   "the pipe character"
+
+   g/plain-text
+   "plain text without any special character"
+
+   g/escape-char
+   "the escape character"
 
    g/any-char
-   "The parser expected anything... It shouldn't bug on that..."
+   "anything... It shouldn't bug on that..."
 
-   g/text-verbatim
-   "The parser expected any text ended with \"!◊\"."
+   g/verbatim-text
+   "any text without \\ or \" characters"
 
-   g/text-comment
-   "The parser expected any text ended with \"/◊\"."
+   g/clojure-string
+   "a clojure string."
 
-   g/text-symbol
-   "The parser expected a clojure symbol here, name for a tag."
+   g/clojure-call-text
+   "clojure code without string nor embedded code"
 
-   g/text-e-value
-   "The parser expected to parse a clojure symbol followed by \"|◊\" here."
+   g/symbol-text
+   "a clojure symbol here"
 
-   g/text-e-code
-   "The parse expected well formatted clojure code ended with \")◊\"."
+   g/tag-spaces
+   "only white space between tag-fn argument types"
 
-   g/text-t-clj
-   "The parser expected well formatted clojure code mixed with tags as if in a literal vector."
+   g/tag-clj-arg-text
+   "clojure code without string nor brackets"
 
-   g/text-t-clj-str
-   "The parser expected text found inside a clojure string end with an \"\"\"."
-
-   g/tag-plain-text
-   "The parser expected plain text without any \"◊\",\"\\\",  \"}\"."
-
-   g/text-spaces
-   "The parser expect spaces only."})
+   g/tag-text-arg-text
+   "text without embedded code nor braces"})
 
 
 (defn get-normalized-error-data [e]
   (letfn [(extract-reason [insta-reason]
             (m/search insta-reason
-                      (m/scan ?x)
-                      (m/match ?x
-                        {:tag       :regexp
-                         :expecting ?regex}
-                        (get error-msgs ?regex ?x)
+              (m/scan ?x)
+              (m/match ?x
+                {:tag :regexp
+                 :expecting ?regex}
+                (get error-msgs ?regex ?x)
 
-                        _
-                        ?x)))]
+                {:tag :string
+                 :expecting ?str}
+                (str "the string \"" ?str "\"")
+
+
+                _
+                ?x)))]
 
     (m/match (ex-data e)
              {:type ::clojure-reader-error
@@ -108,9 +113,9 @@
     (if (= type ::clojure-reader-error)
       (println reason)
       (do
-        (println "Doesn't respect the following:")
+        (println "The parser expected one of")
         (doseq [x reason]
-          (println x))
+          (println "- " x))
         (println)
         (println "Instaparse error:")
         (println failure)))))

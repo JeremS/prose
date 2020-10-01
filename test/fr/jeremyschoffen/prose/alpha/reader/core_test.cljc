@@ -7,7 +7,7 @@
 
 
 (def simple-form '(+ 1 2 3))
-(def simple-form-textp (str \◊ simple-form \◊))
+(def simple-form-textp (str \◊ simple-form))
 
 
 (deftest round-trips
@@ -20,9 +20,6 @@
 (deftest form->text
   (is (= "◊a-tag"
          (-> example1
-             (c/read-from-string {:keep-comments true})
+             c/read-from-string
              second
              (c/form->text example1)))))
-
-
-

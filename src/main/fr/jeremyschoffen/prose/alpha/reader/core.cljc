@@ -1,35 +1,22 @@
 (ns ^{:author "Jeremy Schoffen"
       :doc "
-      This namespaces provides a reader that combines our grammar and clojure's reader to turn a string of text into
-      data clojure can then evaluate.
+This namespaces provides a reader that combines our grammar and clojure's reader to turn a string of prose text into
+data clojure can then evaluate.
 
-      ## Reader results
-      The reader starts by parsing the text using our grammar then returns a *clojurized* version of the parse tree.
+The reader starts by parsing the text using our grammar giving a first representation,
+then computes a *clojurized* version of the parse tree.
 
-      The different syntactic elements are processed as follows:
-
-      - text -> string
-      - tag -> clojure fn call
-      - verbatim block -> string containing the verbatim block's content.
-      - comments -> empty string or special map containing the comment depending on
-        [[textp.reader.alpha.core/*keep-comments*]]
-      - embedded clojure -> drop in clojure code or a map containing the code depending on
-        [[textp.reader.alpha.core/*wrap-embedded*]]
-
-      ## Special maps
-      The reader can wrap comment/embedded clojure in maps if indicated to. These maps have 2 keys:
-      - `type`: a marker explaining the kind of special value the map represents
-      - `data`: the actual value being wrapped, the content of a comment or the embedded clojure code.
-
-      This model is consistent with the way [https://github.com/cgrand/enlive](enlive) treats dtd elements
-      for instance. This may allow for uniform processing when generating html for instance.
-      "}
+The different syntactic elements are processed as follows:
+- text -> string
+- clojure call -> itself
+- symbol -> itself
+- tag -> clojure fn call
+- verbatim block -> string containing the verbatim block's content.
+"}
   fr.jeremyschoffen.prose.alpha.reader.core
-  (:refer-clojure :exclude [comment])
   (:require
     [edamame.core :as eda]
     [clojure.walk :as walk]
-    [net.cgrand.macrovich :as macro :include-macros true]
     [instaparse.core :as insta]
     [medley.core :as medley]
 
@@ -66,29 +53,24 @@
                                  :read-cond :preserve})
 
 
-(macro/replace
-  #?(:clj {}
-     :cljs {Exception js/Error})
-  (defn read-string*
-    "Wrapping of clojure(script)'s read-string function for use in our reader."
-    [s]
-    (try
-      (eda/parse-string s *reader-options*)
-      (catch Exception e
-        (throw
-          (ex-info "Reader failure."
-                   {:type ::error/clojure-reader-error
-                    :text s
-                    :region *parse-region*
-                    :failure e}))))))
+(defn read-string*
+  "Wrapping of clojure(script)'s read-string function for use in our reader."
+  [s]
+  (try
+    (eda/parse-string s *reader-options*)
+    (catch #?@(:clj [Exception e] :cljs [js/Error e])
+           (throw
+             (ex-info "Reader failure."
+                      {:type ::error/clojure-reader-error
+                       :text s
+                       :region *parse-region*
+                       :failure e})))))
+
 
 ;;----------------------------------------------------------------------------------------------------------------------
 ;; Clojurizing
 ;;----------------------------------------------------------------------------------------------------------------------
 (declare clojurize)
-
-
-(defmulti clojurize* :tag)
 
 
 (defn extract-tags [content]
@@ -135,46 +117,47 @@
     (inject-clojurized-tags form env)))
 
 
+(defmulti clojurize* :tag)
+
+
+(defmethod clojurize* :default [node]
+  (throw (ex-info "Unknown parse result." {:tag node})))
+
+
 (defmethod clojurize* :doc [node]
   (mapv clojurize (:content node)))
 
 
-(defmethod clojurize* :verbatim [form]
-  (-> form :content first))
+(defmethod clojurize* :symbol-use [node]
+  (-> node :content first read-string*))
 
 
-(defmethod clojurize* :comment [_] "")
+(defmethod clojurize* :clojure-call [node]
+  (-> node :content clojurize-mixed))
 
 
-(defmethod clojurize* :embedded-value [form]
-  (-> form :content first read-string*))
 
-
-(defmethod clojurize* :embedded-code [form]
-  (clojurize-mixed (:content form)))
-
-
-(defmethod clojurize* :tag [form]
-  (->> form
+(defmethod clojurize* :tag [node]
+  (->> node
        :content
        (into [] (mapcat clojurize))
        seq))
 
 
-(defmethod clojurize* :tag-name [form]
-  (-> form :content first read-string* vector))
+(defmethod clojurize* :tag-name [node]
+  (-> node :content first read-string* vector))
 
 
-(defmethod clojurize* :tag-args-txt [form]
-  (->> form
-       :content
-       (mapv clojurize)))
-
-
-(defmethod clojurize* :tag-args-clj [form]
-  (-> form
+(defmethod clojurize* :tag-clj-arg [node]
+  (-> node
       :content
       clojurize-mixed))
+
+
+(defmethod clojurize* :tag-text-arg [node]
+  (->> node
+       :content
+       (mapv clojurize)))
 
 
 (defn- add-parse-region-meta [form region]
@@ -184,7 +167,7 @@
 
 
 (defn clojurize
-  "Function that turns a textp parse tree to data that clojure can eval.
+  "Function that turns a prose parse tree to data that clojure can eval.
   clojure form that are clojurized have parse info in their metadata."
   [form]
   (if (string? form)
@@ -196,15 +179,13 @@
                 (add-parse-region-meta *parse-region*))))))
 
 
-(macro/replace
-  #?(:clj {}
-     :cljs {Exception js/Error})
-  (defn read-from-string* [text]
-    (try
-      (let [parsed (parse text)]
-        (clojurize parsed))
-      (catch Exception e
-        (error/handle-read-error e)))))
+
+(defn read-from-string* [text]
+  (try
+    (let [parsed (parse text)]
+      (clojurize parsed))
+    (catch #?@(:clj [Exception e] :cljs [js/Error e])
+      (error/handle-read-error e))))
 
 
 (defn read-from-string
@@ -233,46 +214,12 @@
       (subs original start-index end-index))))
 
 
-(clojure.core/comment
-  (read-from-string "◊/com/")
+(comment
   (def ex1
-    "
-
- ◊h1{Addition}
-
- The addition adds numbers together...
-
- ◊(+ 1 2 3)◊
-
- The Addition is associative:
-
- ◊ul{
-   ◊li{◊(+ 1 (+ 2 3))◊}
-   ◊li{◊(+ (+ 1 2) 3)◊}
- }
-
- are equivalent.
-
- ◊div{\\} \\1}")
-  (parse ex1)
-
-  (-> ex1
-      (read-from-string))
-  (-> ex1
-      (read-from-string)
-      second
-      (form->text ex1))
-  (-> ex1
-      (read-from-string)
-      (->> (drop 3))
-      first
-      (form->text ex1))
-
-  (def ex2
-    "Hello my name is ◊em{Some}{Name}.
-     We can embed code ◊(+ 1 2 3)◊.
+    "Hello my name is ◊em{Jeremy}{Schoffen}.
+     We can embed code ◊(+ 1 2 3).
      We can even embed tags in code:
-     ◊(call ◊text{◊em{Me!}})◊
+     ◊(call ◊text{◊em{Me!}})
 
      Tags ins tags args:
      ◊toto[:arg1 ◊em{toto} :arg2 2 :arg3 \"arg 3\"].
@@ -280,20 +227,13 @@
      The craziest, we can embed ad nauseam:
 
      ◊(defn template [x]
-        ◊div[:bonkers ◊div{some text}]
+        ◊div
         {
-          the value x: ◊|x|◊
-          the value x++: ◊(inc x)◊
-        })◊
+          the value x: ◊|x
+          the value x++: ◊(inc x)
+        })")
+  (g/parser ex1)
+  (read-from-string ex1)
 
-     ◊defn [[x]] {◊div}")
-
-  (read-from-string ex2)
-
-  (parse ex2)
-  (-> (read-from-string ex2)
-      second
-      first
-      meta))
-
-
+  (read-from-string "◊div[:a \"stuff]\" :b 1]")
+  (read-from-string "some text ◊(str \"aaa\"\")"))

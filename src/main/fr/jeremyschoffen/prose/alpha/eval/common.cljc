@@ -27,7 +27,7 @@
   (fn [form]
     (try
       (e form)
-      (catch #?(:clj Exception :cljs js/Error) e
+      (catch #?@(:clj [Exception e] :cljs [js/Error e])
         (throw (ex-info "Error during evaluation."
                         {:prose.alpha.evaluation/env *evaluation-env*
                          :prose.alpha.evaluation/form form}
@@ -49,7 +49,7 @@
                       :as ctxt}]
   (let [[ret res] (try
                     [:result (eval-forms* eval-form forms)]
-                    (catch #?(:clj Exception :cljs js/Error) e
+                    (catch #?@(:clj [Exception e] :cljs [js/Error e])
                       [:error e]))]
     (assoc ctxt ret res)))
 
@@ -61,7 +61,7 @@
   `forms` as parameter.
 
   Args:
-  - `ef`: an 'evaluate-form' function that take 1 form and returns the result of evaulating it.
+  - `ef`: an 'evaluate-form' function that take 1 form and returns the result of evaluating it.
   - `middleware`: an 'eval-forms -> eval-forms' function
   - `forms`: the sequence to forms to evaluate"
   [ef middleware forms]
@@ -115,7 +115,7 @@
   [{:keys [middleware-name middleware-action eval-form form]}]
   (try
     (eval-form form)
-    (catch #?(:clj Exception :cljs js/Error) e
+    (catch #?@(:clj [Exception e] :cljs [js/Error e])
       (let [[msg data cause] (destructure-ex-info e)]
         (throw (ex-info msg
                         (assoc data
@@ -129,7 +129,6 @@
                           :middleware-action ::get-current-ns
                           :eval-form eval-form
                           :form '(-> *ns* str symbol)}))
-
 
 
 (defn- back-to-base-ns [eval-form ns-name]

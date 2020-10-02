@@ -92,4 +92,4 @@
 (defn fragment
   "Tag whose content is meant to be spliced into its parent's content."
   [& content]
-  (apply xml-tag :prose.alpha/fragment {} content))
+  (apply xml-tag :<> {} content))

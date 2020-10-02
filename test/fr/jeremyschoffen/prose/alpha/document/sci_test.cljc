@@ -8,7 +8,7 @@
     [sci.core :as sci :include-macros true]
 
     [fr.jeremyschoffen.prose.alpha.reader.core :as reader]
-    [fr.jeremyschoffen.prose.alpha.document.sci.env :as env]
+    [fr.jeremyschoffen.prose.alpha.document.sci :as document]
     [fr.jeremyschoffen.prose.alpha.eval.common :as eval-common :include-macros true]
     [fr.jeremyschoffen.prose.alpha.eval.sci :as eval-sci :include-macros true]))
 
@@ -37,14 +37,14 @@
       reader/read-from-string))
 
 
-(def ctxt (env/init {}))
+(def ctxt (document/init {}))
+
+(def eval-doc (document/make-evaluator
+                {:load-doc load-doc
+                 :eval-forms (partial eval-sci/eval-forms-in-temp-ns ctxt)}))
 
 
-(def doc (eval-common/bind-env {:prose.alpha.document/load-doc load-doc
-                                :prose.alpha.document/eval-doc (partial eval-sci/eval-forms-in-temp-ns ctxt)}
-           (->> "complex-doc/master.tp"
-                load-doc
-                (eval-sci/eval-forms-in-temp-ns ctxt))))
+(def doc (eval-doc "complex-doc/master.tp"))
 
 
 (def ns-tags (filterv #(and (map? %)

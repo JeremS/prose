@@ -1,6 +1,10 @@
-(ns fr.jeremyschoffen.prose.alpha.document.clojure.tags
+(ns fr.jeremyschoffen.prose.alpha.document.common.lib
   (:require
     [fr.jeremyschoffen.prose.alpha.eval.common :as eval-common]))
+
+
+(defn get-input []
+  (eval-common/get-env :prose.alpha.document/input))
 
 
 (defn- get-load-doc []
@@ -8,7 +12,7 @@
 
 
 (defn- get-eval-doc []
-  (eval-common/get-env :prose.alpha.document/eval-doc))
+  (eval-common/get-env :prose.alpha.document/eval-forms))
 
 
 
@@ -17,7 +21,7 @@
                         :as ctxt}]
   (try
     (eval-common/bind-env {:prose.alpha.document/path path}
-                          (load-doc path))
+      (load-doc path))
     (catch #?@(:clj [Exception e] :cljs [js/Error e])
            (throw (ex-info error-msg
                            (dissoc ctxt :error-msg)
@@ -25,7 +29,7 @@
 
 
 (defmacro insert-doc [path]
-  {:tag :prose.alpha/fragment
+  {:tag :<>
    :attrs {}
    :content (load* (get-load-doc)
                    {:path path
@@ -34,7 +38,7 @@
 
 
 (defmacro require-doc [path]
-  {:tag :prose.alpha/fragment
+  {:tag :<>
    :attrs {}
    :content (load* (comp (get-eval-doc)
                          (get-load-doc))
@@ -45,6 +49,12 @@
 
 
 (comment
+
+  (eval-common/bind-env {:prose.alpha.document/input {:some :input}}
+    (eval-common/eval-forms-in-temp-ns
+      '[(require '[fr.jeremyschoffen.prose.alpha.document.common :refer [get-input]])
+        (get-input)]))
+
   (into (sorted-set)
         (comp
           (map str)
@@ -62,6 +72,6 @@
 
   (eval-common/bind-env {:prose.alpha.document/load-doc load-doc
                          :prose.alpha.document/eval-doc eval-common/eval-forms-in-temp-ns}
-                        (-> "complex-doc/master.tp"
-                            load-doc
-                            eval-common/eval-forms-in-temp-ns)))
+    (-> "complex-doc/master.tp"
+        load-doc
+        eval-common/eval-forms-in-temp-ns)))

@@ -5,24 +5,14 @@
     [meander.epsilon :as m]
 
     [fr.jeremyschoffen.prose.alpha.reader.core :as reader]
-    [fr.jeremyschoffen.prose.alpha.eval.common :as eval]))
+    [fr.jeremyschoffen.prose.alpha.eval.common :as eval]
+
+    [fr.jeremyschoffen.prose.alpha.document.clojure :as document]))
 
 
-(defn load-doc [path]
-  (-> path
-      io/resource
-      slurp
-      reader/read-from-string))
+(def eval-doc (document/make-evaluator))
 
-
-
-(def doc (binding [eval/*evaluation-env* (assoc eval/*evaluation-env*
-                                           :prose.alpha.document/load-doc load-doc
-                                           :prose.alpha.document/eval-doc eval/eval-forms-in-temp-ns)]
-           (-> "complex-doc/master.tp"
-               load-doc
-               eval/eval-forms-in-temp-ns)))
-
+(def doc (eval-doc "complex-doc/master.tp"))
 
 (def ns-tags (filterv #(and (map? %)
                             (= :ns (:tag %)))

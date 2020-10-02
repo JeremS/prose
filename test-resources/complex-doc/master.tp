@@ -1,4 +1,4 @@
-◊(require '[fr.jeremyschoffen.prose.alpha.document.clojure.tags :as doc])
+◊(require '[fr.jeremyschoffen.prose.alpha.document.common.lib :as doc])
 ◊(require '[fr.jeremyschoffen.prose.alpha.lib.core :refer [defn-s xml-tag]])
 
 ◊(defn-s get-ns []

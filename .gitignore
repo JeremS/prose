@@ -2,6 +2,6 @@
 .cpcache
 /build
 node_modules
-out
+/out
 scripts
 .nrepl-port

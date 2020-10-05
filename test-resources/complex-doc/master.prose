@@ -7,8 +7,8 @@ Some Intro
 
 This doc is evaluated in ◊get-ns
 
-◊doc/insert-doc {complex-doc/section-1.tp}
+◊doc/insert-doc {complex-doc/section-1.prose}
 
-◊doc/require-doc {complex-doc/section-2.tp}
+◊doc/require-doc {complex-doc/section-2.prose}
 
 We are still in ◊get-ns

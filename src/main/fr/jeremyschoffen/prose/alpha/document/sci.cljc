@@ -42,7 +42,7 @@
   (def eval-doc (make-evaluator {:load-doc load-doc
                                  :eval-forms (partial eval-sci/eval-forms-in-temp-ns ctxt)}))
 
-  (eval-doc "complex-doc/master.tp")
+  (eval-doc "complex-doc/master.prose")
 
 
   (eval-common/bind-env {:prose.alpha.document/input {:some :input}}

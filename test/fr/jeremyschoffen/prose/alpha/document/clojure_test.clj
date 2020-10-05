@@ -12,7 +12,7 @@
 
 (def eval-doc (document/make-evaluator))
 
-(def doc (eval-doc "complex-doc/master.tp"))
+(def doc (eval-doc "complex-doc/master.prose"))
 
 (def ns-tags (filterv #(and (map? %)
                             (= :ns (:tag %)))

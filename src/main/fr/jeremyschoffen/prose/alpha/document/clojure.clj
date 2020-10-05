@@ -26,4 +26,4 @@
 (comment
   (def eval-doc (make-evaluator))
 
-  (eval-doc "complex-doc/master.tp"))
+  (eval-doc "complex-doc/master.prose"))

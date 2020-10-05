@@ -78,7 +78,7 @@
 
   (eval-common/bind-env {:prose.alpha.document/load-doc load-doc
                          :prose.alpha.document/eval-doc eval-common/eval-forms-in-temp-ns}
-                        (-> "complex-doc/master.tp"
+                        (-> "complex-doc/master.prose"
                             load-doc
                             eval-common/eval-forms-in-temp-ns)))
 

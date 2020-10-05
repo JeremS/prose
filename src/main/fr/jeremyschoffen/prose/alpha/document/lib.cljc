@@ -1,7 +1,87 @@
-(ns fr.jeremyschoffen.prose.alpha.lib.core
+(ns fr.jeremyschoffen.prose.alpha.document.lib
   (:require
     #?(:clj [clojure.spec.alpha :as s]
-       :cljs [cljs.spec.alpha :as s :include-macros true])))
+       :cljs [cljs.spec.alpha :as s :include-macros true])
+
+    [fr.jeremyschoffen.prose.alpha.eval.common :as eval-common]))
+
+
+;;----------------------------------------------------------------------------------------------------------------------
+;; Includes from inside documents
+;;----------------------------------------------------------------------------------------------------------------------
+(defn get-input []
+  (eval-common/get-env :prose.alpha.document/input))
+
+
+(defn- get-load-doc []
+  (eval-common/get-env :prose.alpha.document/load-doc))
+
+
+(defn- get-eval-doc []
+  (eval-common/get-env :prose.alpha.document/eval-forms))
+
+
+
+(defn- load* [load-doc {path :path
+                        error-msg :error-msg
+                        :as ctxt}]
+  (try
+    (eval-common/bind-env {:prose.alpha.document/path path}
+                          (load-doc path))
+    (catch #?@(:clj [Exception e] :cljs [js/Error e])
+           (throw (ex-info error-msg
+                           (dissoc ctxt :error-msg)
+                           e)))))
+
+
+(defmacro insert-doc [path]
+  {:tag :<>
+   :attrs {}
+   :content (load* (get-load-doc)
+                   {:path path
+                    :form &form
+                    :error-msg "Error inserting doc."})})
+
+
+(defmacro require-doc [path]
+  {:tag :<>
+   :attrs {}
+   :content (load* (comp (get-eval-doc)
+                         (get-load-doc))
+                   {:path path
+                    :form &form
+                    :error-msg "Error inserting doc."})})
+
+
+
+(comment
+
+  (eval-common/bind-env {:prose.alpha.document/input {:some :input}}
+                        (eval-common/eval-forms-in-temp-ns
+                          '[(require '[fr.jeremyschoffen.prose.alpha.document.lib :refer [get-input]])
+                            (get-input)]))
+
+  (into (sorted-set)
+        (comp
+          (map str)
+          (map keyword))
+        (all-ns))
+
+  (require '[clojure.java.io :as io])
+  (require '[fr.jeremyschoffen.prose.alpha.reader.core :as reader])
+
+  (def load-doc (fn [path]
+                  (-> path
+                      io/resource
+                      slurp
+                      reader/read-from-string)))
+
+  (eval-common/bind-env {:prose.alpha.document/load-doc load-doc
+                         :prose.alpha.document/eval-doc eval-common/eval-forms-in-temp-ns}
+                        (-> "complex-doc/master.tp"
+                            load-doc
+                            eval-common/eval-forms-in-temp-ns)))
+
 
 ;;----------------------------------------------------------------------------------------------------------------------
 ;; Textually silent versions of clojure definitions
@@ -93,3 +173,4 @@
   "Tag whose content is meant to be spliced into its parent's content."
   [& content]
   (apply xml-tag :<> {} content))
+

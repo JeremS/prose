@@ -6,13 +6,12 @@
     [fr.jeremyschoffen.prose.alpha.eval.common :as eval-common]
     [fr.jeremyschoffen.prose.alpha.eval.sci :as eval-sci]
 
-    fr.jeremyschoffen.prose.alpha.document.common.lib
-    fr.jeremyschoffen.prose.alpha.lib.core))
+    fr.jeremyschoffen.prose.alpha.document.lib))
 
 
 (def sci-opt-doc-ns
-  {:namespaces (sci-bindings/make-ns-bindings fr.jeremyschoffen.prose.alpha.document.common.lib
-                                              fr.jeremyschoffen.prose.alpha.lib.core)})
+  {:namespaces (sci-bindings/make-ns-bindings fr.jeremyschoffen.prose.alpha.document.lib)})
+
 
 (defn init [opts]
   (let [opts (medley/deep-merge sci-opt-doc-ns opts)]
@@ -32,7 +31,7 @@
       :env
       deref
       :namespaces
-      (get 'fr.jeremyschoffen.prose.alpha.document.common.lib))
+      (get 'fr.jeremyschoffen.prose.alpha.document.lib))
 
   (def load-doc (fn [path]
                   (-> path
@@ -48,5 +47,5 @@
 
   (eval-common/bind-env {:prose.alpha.document/input {:some :input}}
     (eval-sci/eval-forms-in-temp-ns ctxt
-      '[(require '[fr.jeremyschoffen.prose.alpha.document.common.lib :refer [get-input]])
+      '[(require '[fr.jeremyschoffen.prose.alpha.document.lib :refer [get-input]])
         (get-input)])))

@@ -1,8 +1,8 @@
-(ns fr.jeremyschoffen.prose.alpha.lib.compilation-test
+(ns fr.jeremyschoffen.prose.alpha.compilation.core-test
   (:require
     #?(:clj [clojure.test :refer [deftest testing is are]]
        :cljs [cljs.test :refer-macros [deftest testing is are]])
-    [fr.jeremyschoffen.prose.alpha.lib.compilation :as c :include-macros true]))
+    [fr.jeremyschoffen.prose.alpha.compilation.core :as c :include-macros true]))
 
 
 (def example-1 ["some text\n" nil [1 2 3]])

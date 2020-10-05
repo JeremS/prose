@@ -1,8 +1,8 @@
-(ns fr.jeremyschoffen.prose.alpha.lib.core-test
+(ns fr.jeremyschoffen.prose.alpha.document.lib-test
   (:require
     #?(:clj [clojure.test :refer [deftest testing is are]]
        :cljs [cljs.test :refer-macros [deftest testing is are]])
-    [fr.jeremyschoffen.prose.alpha.lib.core :as lib :include-macros true]))
+    [fr.jeremyschoffen.prose.alpha.document.lib :as lib :include-macros true]))
 
 
 (lib/def-xml-tag div :div)

@@ -1,7 +1,7 @@
 (ns fr.jeremyschoffen.prose.alpha.reader.core-test
   (:require
-    #?(:clj [clojure.test :as test :refer [deftest testing is are]]
-       :cljs [cljs.test :as test :refer-macros [deftest testing is are]])
+    #?(:clj [clojure.test :refer [deftest testing is are]]
+       :cljs [cljs.test :refer-macros [deftest testing is are]])
     [fr.jeremyschoffen.prose.alpha.reader.core :as c]))
 
 
@@ -23,3 +23,11 @@
              c/read-from-string
              second
              (c/form->text example1)))))
+
+(def example
+  "Some text. ◊div[{:class ◊str{c1 c2}}] { ◊def[x 1] ◊(def y 2) }")
+
+
+(deftest complex-example
+  (is (= (c/read-from-string example)
+         '["Some text. " (div {:class (str "c1 c2")} " " (def x 1) " " (def y 2) " ")])))

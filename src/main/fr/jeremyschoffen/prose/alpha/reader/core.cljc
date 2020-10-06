@@ -117,6 +117,10 @@ The different syntactic elements are processed as follows:
     (inject-clojurized-tags form env)))
 
 
+(defn add-type [x t]
+  (vary-meta x assoc ::type t))
+
+
 (defmulti clojurize* :tag)
 
 
@@ -136,11 +140,17 @@ The different syntactic elements are processed as follows:
   (-> node :content clojurize-mixed))
 
 
-
 (defmethod clojurize* :tag [node]
   (->> node
        :content
        (into [] (mapcat clojurize))
+       seq))
+
+
+(defmethod clojurize* :tag-unspliced [node]
+  (->> node
+       :content
+       (into [] (map clojurize))
        seq))
 
 
@@ -149,15 +159,17 @@ The different syntactic elements are processed as follows:
 
 
 (defmethod clojurize* :tag-clj-arg [node]
-  (-> node
-      :content
-      clojurize-mixed))
+  (add-type (-> node
+                :content
+                clojurize-mixed)
+            :tag-clj-arg))
 
 
 (defmethod clojurize* :tag-text-arg [node]
-  (->> node
-       :content
-       (mapv clojurize)))
+  (add-type (->> node
+                 :content
+                 (mapv clojurize))
+            :tag-text-arg))
 
 
 (defn- add-parse-region-meta [form region]
@@ -236,4 +248,13 @@ The different syntactic elements are processed as follows:
   (read-from-string ex1)
 
   (read-from-string "◊div[:a \"stuff]\" :b 1]")
-  (read-from-string "some text ◊(str \"aaa\"\")"))
+  (read-from-string "some text ◊(str \"aaa\"\")")
+
+  (read-from-string "◊div{wanted to use the ◊\"}\" char}")
+  (read-from-string "◊◊div{wanted to use the ◊\"}\" char}{in} [there]")
+  (->> (read-from-string "◊◊div{wanted to use the ◊\"}\" char}{in} [there]")
+       first
+       (map meta))
+
+  (read-from-string "◊[ 1 2 3 a]")
+  (read-from-string "◊str◊{some str}"))

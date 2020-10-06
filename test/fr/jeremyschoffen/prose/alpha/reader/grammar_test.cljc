@@ -1,10 +1,10 @@
 (ns fr.jeremyschoffen.prose.alpha.reader.grammar-test
   (:require
-    #?(:clj [clojure.test :as test :refer [deftest testing is are]]
-       :cljs [cljs.test :as test :refer-macros [deftest testing is are]])
+    #?(:clj [clojure.test :refer [deftest testing is are]]
+       :cljs [cljs.test :refer-macros [deftest testing is are]])
     [fr.jeremyschoffen.prose.alpha.reader.grammar :as g]
     [instaparse.core :as insta]
-    [instaparse.combinators :as instac]
+    ;[instaparse.combinators]
     [meander.epsilon :as m :include-macros true]
     [lambdaisland.regal :as regal]))
 
@@ -122,6 +122,15 @@
            '{:tag :doc,
              :content ("some text "
                         {:tag :tag,
+                         :content ({:tag :tag-name, :content ("div")}
+                                   {:tag :tag-clj-arg, :content ("[" ":classes " "[" ":c1 :c2" "]" "]")}
+                                   {:tag :tag-text-arg, :content ("some text in div " {:tag :tag, :content ({:tag :tag-name, :content ("div")})})})}
+                        " other")}))
+
+    (is (= (g/parser "some text ◊◊div [:classes [:c1 :c2]] {some text in div ◊div} other")
+           '{:tag :doc,
+             :content ("some text "
+                        {:tag :tag-unspliced,
                          :content ({:tag :tag-name, :content ("div")}
                                    {:tag :tag-clj-arg, :content ("[" ":classes " "[" ":c1 :c2" "]" "]")}
                                    {:tag :tag-text-arg, :content ("some text in div " {:tag :tag, :content ({:tag :tag-name, :content ("div")})})})}

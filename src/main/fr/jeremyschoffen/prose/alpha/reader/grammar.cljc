@@ -263,17 +263,18 @@ With the exception of some details, this is how this namespace is made."}
   "The general grammar, tying the lexer and the enclosed rules together with the top grammatical rules."
   (instac/ebnf
     "
-  doc          = (plain-text | embedded)*
-  embedded     = verbatim / symbol-use / clojure-call / tag
+  doc      = (plain-text | embedded)*
+  embedded = verbatim / symbol-use / clojure-call / tag-unspliced / tag
 
-  verbatim     = special-char verbatim-string
-  symbol-use   = special-char pipe-char symbol-text
-  clojure-call = special-char paren-enclosed
-  tag          = special-char tag-name  tag-args* !tag-args
+  verbatim      = special-char verbatim-string
+  symbol-use    = special-char pipe-char symbol-text
+  clojure-call  = special-char paren-enclosed
+  tag           = special-char tag-name  tag-args* !tag-args
+  tag-unspliced = special-char special-char tag-name  tag-args* !tag-args
 
-  tag-name = symbol-text
-  tag-args = tag-spaces (tag-clj-arg | tag-text-arg)
-  tag-clj-arg = bracket-enclosed
+  tag-name     = symbol-text
+  tag-args     = tag-spaces (tag-clj-arg | tag-text-arg)
+  tag-clj-arg  = bracket-enclosed
   tag-text-arg = brace-enclosed
   escaped-char = escape-char any-char
   "))
@@ -363,5 +364,9 @@ With the exception of some details, this is how this namespace is made."}
   (println ex2)
   (parser ex2)
   (parser "◊pollen◊\".\"")
-  (parser "◊div{wanted to use the ◊\"}\" char}"))
+  (parser "◊div{wanted to use the ◊\"}\" char}")
+  (parser "◊◊div{wanted to use the ◊\"}\" char}")
+
+  (parser "◊[]")
+  (parser "◊{}"))
 

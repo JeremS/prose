@@ -97,12 +97,17 @@
        ~@body)))
 
 
-(defmulti emit-str! (fn [_] (:name *implementation*)))
-(defmethod emit-str! :default [s] ((:default-emit-str! *implementation*) s))
+(defn emit-str! [s]
+  ((:default-emit-str! *implementation*) s))
+
 
 
 (defmulti emit-tag! (fn [node] [(:name *implementation*) (:tag node)]))
 (defmethod emit-tag! :default [s] ((:default-emit-tag! *implementation*) s))
+
+
+(defmethod emit-tag! [::default :<>] [x]
+  (emit-seq! (:content x)))
 
 
 (defmulti emit-special! (fn [node] [(:name *implementation*) (:type node)]))
@@ -111,10 +116,9 @@
 
 (defn emit-doc! [node]
   "Emit a document to [[*compilation-out*]].
-  The [[*implementation* also needs to be bound]]"
+  The [[*implementation*]] also needs to be bound"
   (cond
     (special? node) (emit-special! node)
     (tag? node) (emit-tag! node)
     (sequential? node) (emit-seq! node)
-    (string? node) (emit-str! node)
-    :else (throw (ex-info "Can't compile." {:faulty-form node}))))
+    :else (emit-str! node)))

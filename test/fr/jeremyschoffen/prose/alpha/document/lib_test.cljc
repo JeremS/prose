@@ -10,13 +10,13 @@
 (deftest tag-constructor
   (are [x y] (= x y)
              (div)
-             {:tag :div}
+             {:tag :div :type :tag}
 
              (div {:class "toto"} "content")
-             {:tag :div, :attrs {:class "toto"}, :content ["content"]}
+             {:tag :div, :attrs {:class "toto"}, :content ["content"] :type :tag}
 
              (div {:class "toto"})
-             {:tag :div, :attrs {:class "toto"}}
+             {:tag :div, :attrs {:class "toto"} :type :tag}
 
              (div "content")
-             {:tag :div  :content ["content"]}))
+             {:tag :div  :content ["content"] :type :tag}))

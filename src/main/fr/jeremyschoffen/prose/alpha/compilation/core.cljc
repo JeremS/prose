@@ -1,6 +1,7 @@
 (ns fr.jeremyschoffen.prose.alpha.compilation.core
   (:require
-    [net.cgrand.macrovich :as macro :include-macros true])
+    [net.cgrand.macrovich :as macro :include-macros true]
+    [fr.jeremyschoffen.prose.alpha.document.lib :as lib])
   #?(:cljs (:import [goog.string StringBuffer])))
 
 
@@ -69,24 +70,19 @@
     (emit-doc! s)))
 
 
-(defn special? [x]
-  (and (map? x)
-       (contains? x :type)))
-
-
-(def tag? map?)
-
-
 (def ^:dynamic *implementation* {:name ::default
                                  :default-emit-str! (fn [& args]
                                                       (throw (ex-info "No `:default-emit-str!` provided"
-                                                                      {`*implementation* *implementation*})))
+                                                                      {`*implementation* *implementation*
+                                                                       :args args})))
                                  :default-emit-tag! (fn [& args]
                                                       (throw (ex-info "No `:default-emit-tag!` provided"
-                                                                      {`*implementation* *implementation*})))
+                                                                      {`*implementation* *implementation*
+                                                                       :args args})))
                                  :default-emit-special! (fn [& args]
                                                           (throw (ex-info "No `:default-emit-special!` provided"
-                                                                          {`*implementation* *implementation*})))})
+                                                                          {`*implementation* *implementation*
+                                                                           :args args})))})
 
 
 (macro/deftime
@@ -118,7 +114,7 @@
   "Emit a document to [[*compilation-out*]].
   The [[*implementation*]] also needs to be bound"
   (cond
-    (special? node) (emit-special! node)
-    (tag? node) (emit-tag! node)
+    (lib/special? node) (emit-special! node)
+    (lib/tag? node) (emit-tag! node)
     (sequential? node) (emit-seq! node)
     :else (emit-str! node)))

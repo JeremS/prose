@@ -1,7 +1,8 @@
 (ns fr.jeremyschoffen.prose.alpha.out.markdown.compiler
   (:require
     [fr.jeremyschoffen.prose.alpha.compilation.core :as common :refer [emit! emit-seq!]]
-    [fr.jeremyschoffen.prose.alpha.out.html.compiler :as html-cplr]))
+    [fr.jeremyschoffen.prose.alpha.out.html.compiler :as html-cplr]
+    [fr.jeremyschoffen.prose.alpha.out.markdown.tags :as tags]))
 
 
 ;;----------------------------------------------------------------------------------------------------------------------
@@ -32,7 +33,7 @@
   (emit! "```"))
 
 
-(defmethod common/emit-tag! [::md :md-block] [node]
+(defmethod common/emit-tag! [::md ::tags/code-block] [node]
   (let [{:keys [attrs content]} node
         type (get attrs :type "text")]
     (emit-block! type content)))
@@ -58,15 +59,14 @@
 
 
 (comment
-  (require '[fr.jeremyschoffen.prose.alpha.out.html.tags :as tags])
+  (require '[fr.jeremyschoffen.prose.alpha.out.html.tags :as html-tags])
   (compile! ["toto" "titi"
-             (tags/html5-dtd)
-             (tags/comment "<some--> " "comment")
-             (tags/a {:href "http://some.url.com"} "some link")])
+             (html-tags/html5-dtd)
+             (html-tags/comment "<some--> " "comment")
+             (html-tags/a {:href "http://some.url.com"} "some link")])
 
 
-  (println (compile! [{:tag :md-block
-                       :content "(-> 1 (inc))"}
+  (println (compile! [(tags/code-block {:type 'clojure} "(-> 1 (inc))")
                       ">"]))
   (fr.jeremyschoffen.prose.alpha.out.html.compiler/compile! {:tag :md-block
                                                              :content "(-> 1 (inc))"}))

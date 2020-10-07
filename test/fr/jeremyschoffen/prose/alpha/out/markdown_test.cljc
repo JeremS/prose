@@ -3,6 +3,7 @@
     #?(:clj [clojure.test :refer [deftest testing is]]
        :cljs [cljs.test :refer-macros [deftest testing is]])
     [fr.jeremyschoffen.prose.alpha.out.markdown.compiler :as cplr]
+    [fr.jeremyschoffen.prose.alpha.out.markdown.tags :as md-tags]
     [fr.jeremyschoffen.prose.alpha.out.html.tags :as tags]))
 
 
@@ -34,8 +35,7 @@
 
 
 (deftest code-blocks
-  (is (= (cplr/compile! {:tag :md-block
-                         :content "(-> 1 (inc))"})
+  (is (= (cplr/compile! (md-tags/code-block "(-> 1 (inc))"))
          "```text\n(-> 1 (inc))\n```")))
 
 

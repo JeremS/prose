@@ -1,6 +1,64 @@
+◊(require '[fr.jeremyschoffen.prose.alpha.docs.tags :refer :all])
 # Prose
 
+Programmable documents in clojure, similar to what ◊|pollen brings to ◊|racket◊"."
+
+## Installation
+
+◊project-coords
+
+
 ## Usage
+The main idea is to provide a tool that allows the creation of textual documents in which clojure can be embedded.
+This way we can program the content of said documents using the full clojure language.
+
+The way Prose goes about it is by flipping the relationship between strings and code.
+In a clojure file, text is assumed to be code except in special case like strings and comments.
+In prose, text is assumed to be just text except in special cases i.e. clojure code.
+
+One of the main use of Prose is to use it as a text preprocessor when wanting to generate different kinds of text
+documents. The examples following will describe Prose from this angle.
+
+
+### Syntax
+Prose provides a reader similar to what we can find in ◊|pollen◊"." Text is either plain text or a special construct.
+All special construct begin with the character `◊"◊"`(lozenge).
+
+There are several special construct allowing to embed clojure:
+- clojure calls:
+◊reader-sample{examples/example-1.prose}
+
+- clojure symbols:
+◊reader-sample{examples/example-2.prose}
+
+- tag function with clojure code argument in brackets and text argument in braces:
+◊reader-sample{examples/example-3.prose}
+
+- Escaped text:
+◊reader-sample{examples/example-4.prose}
+
+
+In prose one could define function constructing html tag representations then have documents like:
+◊reader-sample{examples/example-5.prose}
+
+
+### Evaluation
+Prose provide tools to evaluate the code read by it's reader. There are common evaluation schemes base on clojure's
+`eval` function. However using clojure's `eval` isn't suited to every context and so evaluation tools based on ◊|sci are
+provided.
+
+Using the last example the evaluation could return something like:
+◊eval-sample {examples/example-5.prose}
+
+This is a workable fragment of html in map form you could use with any clojure library.
+
+
+### Compilation
+With the reading and evaluating part plus some helpers we have for instance text programs generating html
+data repsesentations. To convert this data into html text Prose provides some helpers too. We'd then from the example
+the following generated html text:
+◊doc-sample{examples/example-5.prose}
+
 
 ## License
 

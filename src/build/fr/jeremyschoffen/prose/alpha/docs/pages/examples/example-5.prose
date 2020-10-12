@@ -1,0 +1,9 @@
+◊(require '[fr.jeremyschoffen.prose.alpha.out.html.tags :refer [div ul li]])
+
+◊div{
+  some text
+  ◊ul {
+    ◊li {1}
+    ◊li {2}
+  }
+}

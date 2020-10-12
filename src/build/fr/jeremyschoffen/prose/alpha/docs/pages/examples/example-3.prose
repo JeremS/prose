@@ -1,0 +1,6 @@
+There is a tag function syntax looking like:
+◊div[{:class "grid"}]{ some content}
+◊div{ some ◊em{content}}
+
+or even:
+◊str{text}

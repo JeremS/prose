@@ -114,7 +114,7 @@
 ;;----------------------------------------------------------------------------------------------------------------------
 ;; Default tags
 ;;----------------------------------------------------------------------------------------------------------------------
-(defn fragment
+(defn <>
   "Tag whose content is meant to be spliced into its parent's content."
   [& content]
   (apply xml-tag :<> {} content))
@@ -123,16 +123,22 @@
 ;;----------------------------------------------------------------------------------------------------------------------
 ;; Includes from inside documents
 ;;----------------------------------------------------------------------------------------------------------------------
+(defn get-env
+  ([]
+   (eval-common/get-env))
+  ([k]
+   (eval-common/get-env k)))
+
 (defn get-input []
-  (eval-common/get-env :prose.alpha.document/input))
+  (get-env :prose.alpha.document/input))
 
 
-(defn- get-load-doc []
-  (eval-common/get-env :prose.alpha.document/load-doc))
+(defn get-load-doc []
+  (get-env :prose.alpha.document/load-doc))
 
 
-(defn- get-eval-doc []
-  (eval-common/get-env :prose.alpha.document/eval-forms))
+(defn get-eval-doc []
+  (get-env :prose.alpha.document/eval-forms))
 
 
 
@@ -149,7 +155,7 @@
 
 
 (defmacro insert-doc [path]
-  (apply fragment
+  (apply <>
          (load* (get-load-doc)
                 {:path path
                  :form &form
@@ -157,11 +163,11 @@
 
 
 (defmacro require-doc [path]
-  (apply fragment (load* (comp (get-eval-doc)
-                               (get-load-doc))
-                         {:path path
-                          :form &form
-                          :error-msg "Error inserting doc."})))
+  (apply <> (load* (comp (get-eval-doc)
+                         (get-load-doc))
+                   {:path path
+                    :form &form
+                    :error-msg "Error inserting doc."})))
 
 
 

@@ -10,6 +10,5 @@ repl-build:
 clj-test opts="":
 	clojure -A:clj:cljs:test -m kaocha.runner unit-clj {{opts}}
 
-
 cljs-test opts="":
 	clojure -A:clj:cljs:test -m kaocha.runner unit-cljs {{opts}}

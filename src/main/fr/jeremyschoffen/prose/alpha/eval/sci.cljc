@@ -78,8 +78,8 @@
   ([sci-ctxt forms]
    (let [ef (sci-ctxt->sci-eval sci-ctxt)]
      (eval-common/bind-env {:prose.alpha/env :clojure-sci}
-                           (sci/binding [sci/ns @sci/ns]
-                             (eval-common/eval-forms ef forms))))))
+       (sci/binding [sci/ns @sci/ns]
+         (eval-common/eval-forms ef forms))))))
 
 
 (comment

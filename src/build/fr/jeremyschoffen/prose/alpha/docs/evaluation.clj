@@ -33,11 +33,11 @@
        io/resource
        slurp))
 
+
 (def slurp-doc (wrap-exception slurp-doc* :slurp))
+
+
 (def read-doc (wrap-exception reader/read-from-string :read))
-
-
-
 
 
 (def sci-nss {:namespaces
@@ -69,11 +69,16 @@
 
 
 (comment
-  (println
+  (def doc
     (document "README.md.prose"
-                 {:project/coords
-                  {:maven {'fr.jeremyschofffen/prose-alpha {:mvn/version "123456"}}}}))
+              {:project/coords
+               {:maven {'fr.jeremyschofffen/prose-alpha {:mvn/version "123456"}}}}))
 
-  (document "reader/example-5.prose")
-  (load-doc "README.md.prose")
-  (slurp-doc "reader/example-4.prose"))
+
+  (spit "README-test.MD" doc)
+
+  (-> *e
+      ex-cause)
+      ;ex-data)
+
+  (slurp-doc "readme/example-tags.clj"))

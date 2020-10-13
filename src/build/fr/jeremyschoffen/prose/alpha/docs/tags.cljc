@@ -9,8 +9,6 @@
 
 (u/pseudo-nss project)
 
-(def pollen (lib/xml-tag :a {:href ""} "Pollen"))
-
 (defn make-link [href text]
   (lib/xml-tag :a {:href href} text))
 
@@ -33,24 +31,23 @@
         lein (m/find mvn
                      {?n {:mvn/version ?v}}
                      [?n ?v])]
-    ["Deps coords:"
+    ["Deps coords:\n"
      (md/code-block {:type "clojure"}
        (binding [*print-namespace-maps* false]
          (pr-str mvn)))
      "\n"
 
 
-     "Lein coords:"
+     "Lein coords:\n"
      (md/code-block {:type "clojure"}
        (pr-str lein))
      "\n"
 
-     "Git coords:"
+     "Git coords:\n"
      (md/code-block {:type "clojure"}
        (binding [*print-namespace-maps* false]
          (pr-str git)))
      "\n"]))
-
 
 
 (defn reader-sample [path]
@@ -59,44 +56,19 @@
     (lib/<>
       (md/code-block
         text)
-
       "\n"
       "Reads as:"
       "\n"
       (md/code-block {:type "clojure"}
                      (pr-str (reader/read-from-string text))))))
 
-
-(defn eval-sample [path]
-  (let [slurp-doc  (lib/get-slurp-doc)
-        read-doc (lib/get-read-doc)
-        eval-forms (lib/get-eval-doc)
-        evaled (-> path
-                   slurp-doc
-                   read-doc
-                   eval-forms)
-        text (with-out-str
-               (clojure.pprint/pprint evaled))]
-
-    (lib/<>
-      (md/code-block
-        text))))
+(defn make-sample-tag [t]
+  (fn [path]
+    (let [slurp-doc  (lib/get-slurp-doc)]
+      (md/code-block {:type t}
+                     (clojure.string/trim (slurp-doc path))))))
 
 
-(defn doc-sample [path]
-  (let [slurp-doc  (lib/get-slurp-doc)
-        read-doc (lib/get-read-doc)
-        eval-forms (lib/get-eval-doc)
-        text (-> path
-                 slurp-doc
-                 read-doc
-                 eval-forms
-                 cplr/compile!)]
-
-    (lib/<>
-      (md/code-block {:type "html"}
-        text))))
-
-
-
-
+(def text-sample (make-sample-tag "text"))
+(def html-sample (make-sample-tag "html"))
+(def clojure-sample (make-sample-tag "clojure"))

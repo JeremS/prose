@@ -61,13 +61,6 @@
     (sci/eval-form ctxt form)))
 
 
-(defn wrap-sci-bindings
-  "Middle for evaluation functions that return an performing the evaluation with the sci `bindings` properly set."
-  [eval-fn bindings]
-  (fn [form]
-    (sci/with-bindings bindings
-      (eval-fn form))))
-
 ;;----------------------------------------------------------------------------------------------------------------------
 ;; Eval functions
 ;;----------------------------------------------------------------------------------------------------------------------

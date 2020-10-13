@@ -5,16 +5,9 @@
     [fr.jeremyschoffen.prose.alpha.eval.sci :as sci-eval]
     [sci.core :as sci]))
 
-;;----------------------------------------------------------------------------------------------------------------------
-;; Evaluation from clojure
-;;----------------------------------------------------------------------------------------------------------------------
-
-
-(def my-eval (sci-eval/wrap-sci-bindings  sci-eval/eval-forms {sci/out *out*}))
-
 (def program-1 '[(conj [1 2] 3) (+ 1 2 3)])
 
-(def evaluation-1 (my-eval program-1))
+(def evaluation-1 (sci-eval/eval-forms program-1))
 
 (deftest p1
   (is (= evaluation-1
@@ -28,7 +21,7 @@
 
 (def faulty-evaluation
   (try
-    (my-eval faulty-program)
+    (sci-eval/eval-forms faulty-program)
     (catch #?@(:clj [Exception e] :cljs [js/Error e]) e)))
 
 

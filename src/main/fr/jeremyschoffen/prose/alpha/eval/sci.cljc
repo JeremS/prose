@@ -2,7 +2,7 @@
   (:require
     [medley.core :as medley]
     [sci.core :as sci :include-macros true]
-    [fr.jeremyschoffen.prose.alpha.eval.common :as eval-common]))
+    [fr.jeremyschoffen.prose.alpha.eval.common :as eval-common :include-macros true]))
 
 
 

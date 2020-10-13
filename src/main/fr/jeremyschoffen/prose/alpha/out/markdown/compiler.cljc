@@ -49,7 +49,13 @@
 ;; Compiler
 ;;----------------------------------------------------------------------------------------------------------------------
 (derive ::md ::html-cplr/html)
-(def implementation (assoc html-cplr/implementation :name ::md))
+(def implementation
+  "Markdown implementation of our generic compiler, this is meant to a binding to
+  [[fr.jeremyschoffen.prose.alpha.compilation.core]] and is based / derived from
+  [[fr.jeremyschoffen.prose.alpha.out.html.compiler/implementation]]."
+  (assoc html-cplr/implementation
+    :name ::md
+    :default-emit-str! common/emit!))
 
 
 (defn compile! [doc]

@@ -39,9 +39,9 @@
          "```text\n(-> 1 (inc))\n```")))
 
 
-(deftest escaping
+(deftest not-escaping
   (is (= (cplr/compile! ">")
-         "&gt;")))
+         ">")))
 
 
 (deftest comments

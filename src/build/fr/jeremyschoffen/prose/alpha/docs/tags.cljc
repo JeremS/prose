@@ -54,7 +54,7 @@
 
 
 (defn reader-sample [path]
-  (let [slurp-doc (:fr.jeremyschoffen.prose.alpha.docs.evaluation/slurp-doc (lib/get-input))
+  (let [slurp-doc  (lib/get-slurp-doc)
         text (slurp-doc path)]
     (lib/<>
       (md/code-block
@@ -68,10 +68,12 @@
 
 
 (defn eval-sample [path]
-  (let [load-doc (lib/get-load-doc)
+  (let [slurp-doc  (lib/get-slurp-doc)
+        read-doc (lib/get-read-doc)
         eval-forms (lib/get-eval-doc)
         evaled (-> path
-                   load-doc
+                   slurp-doc
+                   read-doc
                    eval-forms)
         text (with-out-str
                (clojure.pprint/pprint evaled))]
@@ -80,11 +82,14 @@
       (md/code-block
         text))))
 
+
 (defn doc-sample [path]
-  (let [load-doc (lib/get-load-doc)
+  (let [slurp-doc  (lib/get-slurp-doc)
+        read-doc (lib/get-read-doc)
         eval-forms (lib/get-eval-doc)
         text (-> path
-                 load-doc
+                 slurp-doc
+                 read-doc
                  eval-forms
                  cplr/compile!)]
 

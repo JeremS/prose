@@ -6,13 +6,13 @@
     [fr.jeremyschoffen.prose.alpha.reader.core :as reader]))
 
 
-(defn default-load-doc [path]
+(defn default-slurp-doc [path]
   (-> path
       io/resource
-      slurp
-      reader/read-from-string))
+      slurp))
 
-(def default-env {:load-doc default-load-doc
+(def default-env {:slurp-doc default-slurp-doc
+                  :read-doc reader/read-from-string
                   :eval-forms eval-common/eval-forms-in-temp-ns})
 
 

@@ -3,17 +3,20 @@
     [fr.jeremyschoffen.prose.alpha.eval.common :as eval-common]))
 
 
-(defn eval-doc [{:prose.alpha.document/keys [path load-doc eval-forms] :as env}]
+(defn eval-doc [{:prose.alpha.document/keys [path slurp-doc read-doc eval-forms] :as env}]
   (eval-common/bind-env env
     (-> path
-        load-doc
+        slurp-doc
+        read-doc
         eval-forms)))
 
 
-(defn make [{load-doc :load-doc
+(defn make [{slurp-doc :slurp-doc
+             read-doc :read-doc
              efs      :eval-forms}]
-  (let [env {:prose.alpha.document/eval-forms efs
-             :prose.alpha.document/load-doc load-doc}]
+  (let [env {:prose.alpha.document/slurp-doc slurp-doc
+             :prose.alpha.document/read-doc read-doc
+             :prose.alpha.document/eval-forms efs}]
     (fn
       ([path]
        (eval-doc (assoc env

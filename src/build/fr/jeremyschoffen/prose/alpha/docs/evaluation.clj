@@ -10,7 +10,7 @@
     [fr.jeremyschoffen.prose.alpha.out.markdown.compiler :as cplr]
 
 
-    fr.jeremyschoffen.prose.alpha.docs.tags
+    fr.jeremyschoffen.prose.alpha.out.html.tags
     fr.jeremyschoffen.prose.alpha.out.html.tags))
 
 
@@ -38,10 +38,6 @@
 
 
 
-(defn load-doc [path]
-  (-> path
-      slurp-doc
-      read-doc))
 
 
 (def sci-nss {:namespaces
@@ -50,13 +46,15 @@
                 fr.jeremyschoffen.prose.alpha.out.html.tags)})
 
 
+
 (def sci-ctxt (doc/init sci-nss))
 
 
 (def eval-forms (wrap-exception (partial eval-sci/eval-forms-in-temp-ns sci-ctxt) :eval))
 
 
-(def eval-doc (doc/make-evaluator {:load-doc load-doc
+(def eval-doc (doc/make-evaluator {:slurp-doc slurp-doc
+                                   :read-doc reader/read-from-string
                                    :eval-forms eval-forms}))
 
 

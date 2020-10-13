@@ -30,17 +30,17 @@
        (str (.readFileSync fs p)))))
 
 
-(defn load-doc [path]
+(defn slurp-doc [path]
   (-> path
       resource
-      read-file
-      reader/read-from-string))
+      read-file))
 
 
 (def ctxt (document/init {}))
 
 (def eval-doc (document/make-evaluator
-                {:load-doc load-doc
+                {:slurp-doc slurp-doc
+                 :read-doc reader/read-from-string
                  :eval-forms (partial eval-sci/eval-forms-in-temp-ns ctxt)}))
 
 

@@ -133,8 +133,12 @@
   (get-env :prose.alpha.document/input))
 
 
-(defn get-load-doc []
-  (get-env :prose.alpha.document/load-doc))
+(defn get-slurp-doc []
+  (get-env :prose.alpha.document/slurp-doc))
+
+
+(defn get-read-doc []
+  (get-env :prose.alpha.document/read-doc))
 
 
 (defn get-eval-doc []
@@ -156,7 +160,8 @@
 
 (defmacro insert-doc [path]
   (apply <>
-         (load* (get-load-doc)
+         (load* (comp (get-read-doc)
+                      (get-slurp-doc))
                 {:path path
                  :form &form
                  :error-msg "Error inserting doc."})))
@@ -164,7 +169,8 @@
 
 (defmacro require-doc [path]
   (apply <> (load* (comp (get-eval-doc)
-                         (get-load-doc))
+                         (get-read-doc)
+                         (get-slurp-doc))
                    {:path path
                     :form &form
                     :error-msg "Error inserting doc."})))

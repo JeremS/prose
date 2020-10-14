@@ -6,12 +6,6 @@
 (u/pseudo-nss project)
 
 
-(comment
-  (ev/document "README.md.prose"
-               {:project/coords
-                 {:maven {'fr.jeremyschofffen/prose-alpha {:mvn/version "123456"}}}}))
-
-
 (defn make-readme! [{wd ::project/working-dir
                      mvn-coords ::project/maven-coords
                      git-coords ::project/git-coords
@@ -20,3 +14,7 @@
         (ev/document "README.md.prose"
                      {:project/coords {:maven mvn-coords
                                        :git git-coords}})))
+
+(comment
+  (ev/document "README.md.prose"
+               {:project/coords {}}))

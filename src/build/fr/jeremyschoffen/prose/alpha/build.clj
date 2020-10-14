@@ -36,12 +36,14 @@
                                    ::project.license/distribution :repo
                                    ::project.license/file (u/safer-path "LICENSE")}]}))
 
+;; TODO: Enable the generation of maven artifact when Sci releases a new version on clojars
+;; since the APIs we use are from 2020-09 and the current clojars version is from 2020-08
 
 (defn generate-docs! [conf]
   (-> conf
       mbt-build/merge-last-version
-      (u/assoc-computed ::project/maven-coords mbt-defaults/deps-make-maven-coords
-                        ::project/git-coords mbt-defaults/deps-make-git-coords)
+      (u/assoc-computed ::project/git-coords mbt-defaults/deps-make-git-coords)
+                        ;::project/maven-coords mbt-defaults/deps-make-maven-coords)
       (assoc-in [::git/commit! ::git.commit/message] "Generated the docs.")
       (mbt-defaults/generate-then-commit!
         (u/do-side-effect! docs/make-readme!))))
@@ -78,19 +80,15 @@
                  mbt-build/deploy!])
 
 (comment
-  (-> conf
-      mbt-build/next-version+1
-      str)
-
   (mbt-core/clean! conf)
 
   (bump-project!)
 
-  (mbt-build/build! conf)
+  #_(mbt-build/build! conf)
 
-  (mbt-build/install! conf)
+  #_(mbt-build/install! conf)
 
-  (-> conf
-      (assoc ::maven/credentials {::maven.credentials/user-name "jeremys"
-                                  ::maven.credentials/password token})
-      mbt-build/deploy!))
+  #_(-> conf
+        (assoc ::maven/credentials {::maven.credentials/user-name "jeremys"
+                                    ::maven.credentials/password token})
+        mbt-build/deploy!))

@@ -6,7 +6,7 @@ Alternate syntax for Clojure, similar to what [Pollen](https://github.com/mbutte
 ## Installation
 Git coords:
 ```clojure
-{fr.jeremyschoffen/prose-alpha {:git/url "https://github.com/JeremS/prose.git", :sha "cbb56f6198deef76ba4298ea264992251b204421"}}
+{fr.jeremyschoffen/prose-alpha {:git/url "https://github.com/JeremS/prose.git", :sha "117a23232df4d1af59ef0ca686b14dac16b8b060"}}
 ```
 
 
@@ -217,6 +217,9 @@ Pros:
 Cons:
 - May be a bit of a perf hit.
 - Managing the sci context makes for an api not as easy to use.
+
+## Mentions
+This work is of course inspired and influenced by [Pollen](https://github.com/mbutterick/pollen) and [Scribble](https://docs.racket-lang.org/scribble/index.html).
 
 ## License
 

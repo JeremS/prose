@@ -1,4 +1,8 @@
-(ns fr.jeremyschoffen.prose.alpha.out.html.tags
+(ns ^{:author "Jeremy Schoffen"
+      :doc "
+Api containing constructor functions for html tags.
+"}
+  fr.jeremyschoffen.prose.alpha.out.html.tags
   (:refer-clojure
     :exclude [map meta time var comment])
   (:require
@@ -9,7 +13,7 @@
 (d/def-all-tags)
 
 
-(lib/def-xml-tag <> "The fragment tags.")
+(lib/def-xml-tag <> "The fragment tag.")
 
 
 (defn dtd [name public-id system-id]
@@ -17,9 +21,13 @@
    :data [name public-id system-id]})
 
 
-(defn html5-dtd [& args]
+(defn html5-dtd
+  "The html 5 doctype tag."
+  [& args]
   (dtd "html" nil nil))
 
 
-(defn comment [& args]
+(defn comment
+  "A html comment."
+  [& args]
   {:type :comment, :data (vec args)})

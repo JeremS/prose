@@ -54,8 +54,6 @@ rules
 ## The combining trick
 Now that we have both a lexer and and grammatical rules, we can simply merge them to have the full grammar.
 
-We actually get a instparse parser this way:
-
 ````clojure
 (def parser
   (insta/parser (merge lexer rules)
@@ -70,7 +68,7 @@ We actually get a instparse parser this way:
       [:token [:number \"3\"]]]
 ```
 
-With the exception of some details, this is how this namespace is made."}
+With the exception of some details, this is how this namespace is organized."}
   fr.jeremyschoffen.prose.alpha.reader.grammar
   (:require
     [instaparse.core :as insta]

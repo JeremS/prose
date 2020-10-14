@@ -1,4 +1,11 @@
-(ns fr.jeremyschoffen.prose.alpha.out.latex.compiler
+(ns ^{:author "Jeremy Schoffen"
+      :doc "
+Specialization of the generic compiler from [[fr.jeremyschoffen.prose.alpha.compilation.core]]
+to compile to LaTeX.
+
+Very, don't use it yet.
+"}
+  fr.jeremyschoffen.prose.alpha.out.latex.compiler
   (:require
     [fr.jeremyschoffen.prose.alpha.compilation.core :as common :refer [emit! emit-seq!]]))
 

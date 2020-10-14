@@ -1,4 +1,8 @@
-(ns fr.jeremyschoffen.prose.alpha.document.lib
+(ns ^{:author "Jeremy Schoffen"
+      :doc "
+Api providing several tools to use inside or outside of prose document.
+"}
+  fr.jeremyschoffen.prose.alpha.document.lib
   (:require
     #?(:clj [clojure.spec.alpha :as s]
        :cljs [cljs.spec.alpha :as s :include-macros true])
@@ -9,18 +13,24 @@
 ;;----------------------------------------------------------------------------------------------------------------------
 ;; Textually silent versions of clojure definitions
 ;;----------------------------------------------------------------------------------------------------------------------
-(defmacro def-s [& args]
+(defmacro def-s
+  "Same as `def` excpet that it returns and empty string."
+  [& args]
   `(do
      (def ~@args)
      ""))
 
+
 (defmacro defn-s [& args]
+  "Same as `defn` excpet that it returns and empty string."
   `(do
      (defn ~@args)
      ""))
 
 
-(defmacro defmacro-s [& args]
+(defmacro defmacro-s
+  "Same as `defmacro` excpet that it returns and empty string."
+  [& args]
   `(do
      (defmacro ~@args)
      ""))
@@ -30,7 +40,7 @@
 ;; Tag utils
 ;;----------------------------------------------------------------------------------------------------------------------
 (defn conform-or-throw
-  "Conforms the value `v`  using `spec` and throw if `v` is invalid."
+  "Conforms the value `v` using the spec `spec` and throws an `ex-info` if `v` is invalid."
   [spec v]
   (let [res (s/conform spec v)]
     (when (s/invalid? res)
@@ -39,17 +49,23 @@
     res))
 
 
-(defn tag-type [x]
+(defn tag-type
+  "Returns the type of a tag `x` or nil isn't a map or doesn't have a type."
+  [x]
   (when (map? x)
     (:type x)))
 
 
-(defn special? [x]
+(defn special?
+  "Determine if `x` is a special tag."
+  [x]
   (when-let [t (tag-type x)]
     (not= :tag t)))
 
 
-(defn tag? [x]
+(defn tag?
+  "Determine if `x` is a normal tag."
+  [x]
   (when-let [t (tag-type x)]
     (= :tag t)))
 
@@ -59,8 +75,24 @@
                                                 (complement (some-fn special? tag?))))
                         :content (s/* any?)))
 
+(defn xml-tag
+  "Constructor of normal tags.
 
-(defn xml-tag [& args]
+  args:
+  - `name`: a keyword giving the tag his name (:div, :my-tag, etc...)
+  - `attrs`: a map of attributes
+  - `content`: the content of the tag, strings, other (special)tags or sequences of both.
+
+  Returns a map similar to:
+  ```clojure
+  {:type :tag
+   :tag name
+   :attrs attrs?
+   :content content}
+  ```
+  "
+  {:arglists '([name attrs? & content])}
+  [& args]
   (->  (conform-or-throw ::xml-tag args)
        (assoc :type :tag)))
 
@@ -115,7 +147,7 @@
 ;; Default tags
 ;;----------------------------------------------------------------------------------------------------------------------
 (defn <>
-  "Tag whose content is meant to be spliced into its parent's content."
+  "Fragment tag whose content is meant to be spliced into its parent's content."
   [& content]
   (apply xml-tag :<> {} content))
 
@@ -124,24 +156,33 @@
 ;; Includes from inside documents
 ;;----------------------------------------------------------------------------------------------------------------------
 (defn get-env
+  "Get the evaluation environment or the value for one of its keys."
   ([]
    (eval-common/get-env))
   ([k]
    (eval-common/get-env k)))
 
-(defn get-input []
+(defn get-input
+  "Get the input value from the evaluation environment."
+  []
   (get-env :prose.alpha.document/input))
 
 
-(defn get-slurp-doc []
+(defn get-slurp-doc
+  "Get the slurping function from the evaluation environment."
+  []
   (get-env :prose.alpha.document/slurp-doc))
 
 
-(defn get-read-doc []
+(defn get-read-doc
+  "Get the reading function from the evaluation environment."
+  []
   (get-env :prose.alpha.document/read-doc))
 
 
-(defn get-eval-doc []
+(defn get-eval-doc
+  "Get the eval-forms function from the evaluation environment."
+  []
   (get-env :prose.alpha.document/eval-forms))
 
 
@@ -158,7 +199,9 @@
                            e)))))
 
 
-(defmacro insert-doc [path]
+(defmacro insert-doc
+  "Insert the slurped and read content of another document."
+  [path]
   (apply <>
          (load* (comp (get-read-doc)
                       (get-slurp-doc))
@@ -167,7 +210,9 @@
                  :error-msg "Error inserting doc."})))
 
 
-(defmacro require-doc [path]
+(defmacro require-doc
+  "Insert the slurped and read and evaluated content of another document."
+  [path]
   (apply <> (load* (comp (get-eval-doc)
                          (get-read-doc)
                          (get-slurp-doc))
@@ -178,7 +223,6 @@
 
 
 (comment
-
   (eval-common/bind-env {:prose.alpha.document/input {:some :input}}
                         (eval-common/eval-forms-in-temp-ns
                           '[(require '[fr.jeremyschoffen.prose.alpha.document.lib :refer [get-input]])

@@ -1,4 +1,9 @@
-(ns fr.jeremyschoffen.prose.alpha.out.markdown.compiler
+(ns ^{:author "Jeremy Schoffen"
+      :doc "
+Specialization of the generic compiler from [[fr.jeremyschoffen.prose.alpha.compilation.core]]
+to compile to markdown.
+"}
+  fr.jeremyschoffen.prose.alpha.out.markdown.compiler
   (:require
     [fr.jeremyschoffen.prose.alpha.compilation.core :as common :refer [emit! emit-seq!]]
     [fr.jeremyschoffen.prose.alpha.out.html.compiler :as html-cplr]
@@ -73,6 +78,6 @@
 
 
   (println (compile! [(tags/code-block {:type 'clojure} "(-> 1 (inc))")
-                      ">"]))
+                      "\n>"]))
   (fr.jeremyschoffen.prose.alpha.out.html.compiler/compile! {:tag :md-block
                                                              :content "(-> 1 (inc))"}))

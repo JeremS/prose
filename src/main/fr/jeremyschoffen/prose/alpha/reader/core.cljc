@@ -3,8 +3,8 @@
 This namespaces provides a reader that combines our grammar and clojure's reader to turn a string of prose text into
 data clojure can then evaluate.
 
-The reader starts by parsing the text using our grammar giving a first representation,
-then computes a *clojurized* version of the parse tree.
+The reader starts by parsing the text using our grammar. This gives a first data representation from which
+is computed data that clojure can evaluate.
 
 The different syntactic elements are processed as follows:
 - text -> string
@@ -54,7 +54,7 @@ The different syntactic elements are processed as follows:
 
 
 (defn read-string*
-  "Wrapping of clojure(script)'s read-string function for use in our reader."
+  "Wrapping of edamame's read-string function for use in our reader."
   [s]
   (try
     (eda/parse-string s *reader-options*)
@@ -202,9 +202,11 @@ The different syntactic elements are processed as follows:
 
 (defn read-from-string
   "
+  The entry point of the reader.
+
   Args:
-  - `text`: string we want to read
-  - `opts`: a :map specifying options
+  - `text`: string to read
+  - `opts`: a map specifying options
 
   Options:
   - `:reader-options`: The options to pass the clojure reader, it's the map that will be passed to

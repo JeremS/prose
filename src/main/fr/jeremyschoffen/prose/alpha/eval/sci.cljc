@@ -1,4 +1,8 @@
-(ns fr.jeremyschoffen.prose.alpha.eval.sci
+(ns ^{:author "Jeremy Schoffen"
+      :doc "
+Api providing tools to facilitate the evaluation of documents using Sci.
+"}
+  fr.jeremyschoffen.prose.alpha.eval.sci
   (:require
     [medley.core :as medley]
     [sci.core :as sci :include-macros true]
@@ -7,20 +11,23 @@
 
 
 
-(def sci-opt-features {:features #?(:clj #{:clj}
-                                    :cljs #{:cljs}
-                                    :default #{})})
+(def sci-opt-features
+  "Sci option map containing values for the `:features` key."
+  {:features #?(:clj #{:clj}
+                :cljs #{:cljs}
+                :default #{})})
 
 
-(def sci-opt-println {:namespaces #?(:clj {}
-                                     :cljs {'clojure.core {'println println}})})
+(def sci-opt-println
+  "Sci option map containing values for the `:namespaces` key that allows in the clojurescript case to redefine
+  sci own `'clojure.core/println` to `cljs.core/println`. Using this map to cretes sci context in cojure does nothing."
+  {:namespaces #?(:clj {}
+                  :cljs {'clojure.core {'println println}})})
 
 (defn init
   "Create a sci evaluation context.
 
-  Same as [[sci.core/init]] with the [[eval-ns]] installed. The goal is to provide code executed by sci
-  an environment that has a namespace equivalent to [[fr.jeremyschoffen.prose.alpha.eval.clojure]] pre-installed
-  in the namespace `fr.jeremyschoffen.prose.alpha.eval.sci`."
+  Same as [[sci.core/init]] with the [[sci-opt-features]] pre-installed. "
   [opts]
   (->> opts
        (medley/deep-merge sci-opt-features)

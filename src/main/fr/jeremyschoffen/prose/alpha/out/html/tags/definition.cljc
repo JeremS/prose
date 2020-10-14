@@ -1,9 +1,14 @@
-(ns fr.jeremyschoffen.prose.alpha.out.html.tags.definition
+(ns ^{:author "Jeremy Schoffen"
+      :doc "
+Utility namespace providing a macro that generates constructor functions for commonly used html tags.
+"}
+  fr.jeremyschoffen.prose.alpha.out.html.tags.definition
   (:require
     [fr.jeremyschoffen.prose.alpha.document.lib :as lib :include-macros true]))
 
 
 (def tags
+  "Commonly used tags"
   '[a abbr acronym address applet area article aside audio
     b base basefont bdi bdo big blockquote body br button
     canvas caption center cite code col colgroup
@@ -44,6 +49,9 @@
     tspan])
 
 
-(defmacro def-all-tags []
+(defmacro def-all-tags
+  "Macro using [[tags]] to generate constructors for them using
+  [[fr.jeremyschoffen.prose.alpha.document.lib/def-xml-tags]]"
+  []
   `(lib/def-xml-tags ~@tags))
 

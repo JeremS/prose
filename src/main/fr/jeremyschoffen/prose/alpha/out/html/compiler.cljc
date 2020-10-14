@@ -1,4 +1,9 @@
-(ns fr.jeremyschoffen.prose.alpha.out.html.compiler
+(ns ^{:author "Jeremy Schoffen"
+      :doc "
+Specialization of the generic compiler from [[fr.jeremyschoffen.prose.alpha.compilation.core]]
+to compile to html.
+"}
+  fr.jeremyschoffen.prose.alpha.out.html.compiler
   (:require
     [fr.jeremyschoffen.prose.alpha.compilation.core :as common :refer [emit! emit-seq!]]
     [fr.jeremyschoffen.prose.alpha.out.html.tags :as tags]))
@@ -92,7 +97,9 @@
         (emit! "></" tag-name-str ">")))))
 
 
-(defn emit-tag! [{:keys [tag attrs content]}]
+(defn emit-tag!
+  "Emits a html tag which is a map with the keys `:tag`, `:attrs` and `:content`."
+  [{:keys [tag attrs content]}]
   (let [tag-name (name-str tag)]
     (emit! "<" tag-name)
     (emit-attrs! attrs)
@@ -114,13 +121,18 @@
 ;; implementation
 ;;----------------------------------------------------------------------------------------------------------------------
 (derive ::html ::common/default)
-(def implementation (assoc common/*implementation*
-                      :name ::html
-                      :default-emit-str! #(emit! (xml-str %))
-                      :default-emit-tag! emit-tag!))
+(def implementation
+  "Html implementation of our generic compiler, this is meant to a binding to
+  [[fr.jeremyschoffen.prose.alpha.compilation.core]]."
+  (assoc common/*implementation*
+    :name ::html
+    :default-emit-str! #(emit! (xml-str %))
+    :default-emit-tag! emit-tag!))
 
 
-(defn compile! [doc]
+(defn compile!
+  "Compile a document (in data form) into html text."
+  [doc]
   (common/text-environment
     (common/with-implementation implementation
       (common/emit-doc! doc))))

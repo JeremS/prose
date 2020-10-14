@@ -1,4 +1,8 @@
-(ns fr.jeremyschoffen.prose.alpha.document.sci
+(ns ^{:author "Jeremy Schoffen"
+      :doc "
+API providing evaluation tools to evaluate document using Sci.
+"}
+  fr.jeremyschoffen.prose.alpha.document.sci
   (:require
     [medley.core :as medley]
     [fr.jeremyschoffen.prose.alpha.document.common.evaluator :as evaluator]
@@ -10,15 +14,23 @@
 
 
 (def sci-opt-doc-ns
+  "Default namespaces bindings options passed to sci when making a sci evaluation context.
+
+  Here the [[fr.jeremyschoffen.prose.alpha.document.lib]]is made avalable from inside document by default."
   {:namespaces (sci-bindings/make-ns-bindings fr.jeremyschoffen.prose.alpha.document.lib)})
 
 
-(defn init [opts]
+(defn init
+  "Initialize a Sci evaluation context using [[fr.jeremyschoffen.prose.alpha.eval.sci/init]] and
+  merging automatically [[sci-opt-doc-ns]]"
+  [opts]
   (let [opts (medley/deep-merge sci-opt-doc-ns opts)]
     (eval-sci/init opts)))
 
 
-(def make-evaluator evaluator/make)
+(def make-evaluator
+  "Alias for the function [[fr.jeremyschoffen.prose.alpha.document.common.evaluator/make]]"
+  evaluator/make)
 
 
 (comment

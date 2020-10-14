@@ -1,9 +1,17 @@
-(ns fr.jeremyschoffen.prose.alpha.eval.common)
+(ns ^{:author "Jeremy Schoffen"
+      :doc "
+Api providing tools to facilitate the evaluation of documents.
+"}
+  fr.jeremyschoffen.prose.alpha.eval.common)
 
 
-(def ^:dynamic *evaluation-env* {:prose.alpha/env :clojure})
+(def ^:dynamic *evaluation-env*
+  "A intended to be bound to a map containing data about an evaluation. This is intented
+  to be the input / environment of an evaluation."
+  {:prose.alpha/env :clojure})
 
 (defn get-env
+  "Get the evaluation environment or a specific `key` from it."
   ([]
    *evaluation-env*)
   ([key]
@@ -14,7 +22,11 @@
 
 
 (defmacro bind-env
-  "Utility allowing to merge kvs keys to the [[*evaluation-env*]] map."
+  "Utility allowing to merge kvs keys to the [[*evaluation-env*]] map.
+
+  Args:
+  - `bindings`: a map that will be merged into [[*evaluation-env*]].
+  - `body`: code to execute in this new environment."
   [bindings & body]
   `(binding [*evaluation-env* (merge *evaluation-env* ~bindings)]
      ~@body))
@@ -35,18 +47,29 @@
 
 
 (defn eval-forms*
-  "Evaluates a sequences of forms `forms` in sequence with `eval-form`"
+  "Evaluate a sequences of forms `forms` in sequence with `eval-form`"
   [eval-form forms]
   (into [] (map eval-form) forms))
 
 
-(defn make-evaluation-ctxt [eval-form forms]
+(defn make-evaluation-ctxt
+  "Make an evaluation context.
+
+  This context is a map of 2 keys:
+  - `:forms`: a sequence of forms to evaluate
+  - `eval-form`: a function that evaluates one form"
+  [eval-form forms]
   {:forms forms
    :eval-form (wrap-eval-form-exception eval-form)})
 
 
-(defn evaluate-ctxt [{:keys [forms eval-form]
-                      :as ctxt}]
+(defn evaluate-ctxt
+  "Function evaluating a context (produced by [[make-evaluation-ctxt]]).
+  Returns the context with a new key associated:
+  - `:result`: in the case of a successful evaluation the sequence of evaluation is returned here
+  - `:error`: in the case of an error, the exception is returned here."
+  [{:keys [forms eval-form]
+    :as ctxt}]
   (let [[ret res] (try
                     [:result (eval-forms* eval-form forms)]
                     (catch #?@(:clj [Exception e] :cljs [js/Error e])

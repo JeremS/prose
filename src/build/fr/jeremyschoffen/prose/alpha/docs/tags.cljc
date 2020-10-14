@@ -18,11 +18,6 @@
 (def scribble (make-link "https://docs.racket-lang.org/scribble/index.html" "Scribble"))
 (def sci (make-link "https://github.com/borkdude/sci" "Sci"))
 
-(defn mvn-version [v]
-  (lib/<>
-    (md/code-block {:type "clojure"}
-                   (pr-str v))))
-
 
 (defn project-coords []
   (let [coords  (:project/coords (lib/get-input))
@@ -32,19 +27,19 @@
                      {?n {:mvn/version ?v}}
                      [?n ?v])]
     ["Deps coords:\n"
-     (md/code-block {:type "clojure"}
+     (md/code-block {:content-type "clojure"}
        (binding [*print-namespace-maps* false]
          (pr-str mvn)))
      "\n"
 
 
      "Lein coords:\n"
-     (md/code-block {:type "clojure"}
+     (md/code-block {:content-type "clojure"}
        (pr-str lein))
      "\n"
 
      "Git coords:\n"
-     (md/code-block {:type "clojure"}
+     (md/code-block {:content-type "clojure"}
        (binding [*print-namespace-maps* false]
          (pr-str git)))
      "\n"]))
@@ -59,13 +54,13 @@
       "\n"
       "Reads as:"
       "\n"
-      (md/code-block {:type "clojure"}
+      (md/code-block {:content-type "clojure"}
                      (pr-str (reader/read-from-string text))))))
 
 (defn make-sample-tag [t]
   (fn [path]
     (let [slurp-doc  (lib/get-slurp-doc)]
-      (md/code-block {:type t}
+      (md/code-block {:content-type t}
                      (clojure.string/trim (slurp-doc path))))))
 
 

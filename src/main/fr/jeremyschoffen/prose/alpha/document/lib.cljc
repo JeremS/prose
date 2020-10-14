@@ -56,7 +56,7 @@
 
 (s/def ::xml-tag (s/cat :tag keyword?
                         :attrs (s/? (every-pred map?
-                                                (complement tag?)))
+                                                (complement (some-fn special? tag?))))
                         :content (s/* any?)))
 
 

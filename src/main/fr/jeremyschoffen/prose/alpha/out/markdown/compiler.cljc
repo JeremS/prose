@@ -35,7 +35,7 @@
 
 (defmethod common/emit-tag! [::md ::tags/code-block] [node]
   (let [{:keys [attrs content]} node
-        type (get attrs :type "text")]
+        type (get attrs :content-type "text")]
     (emit-block! type content)))
 
 

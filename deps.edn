@@ -8,7 +8,7 @@
         lambdaisland/regal       {:mvn/version "0.0.89"}
 
         borkdude/sci {:git/url "https://github.com/borkdude/sci"
-                      :sha "b0e7d64b723daa371d1fd87edd74310f06d0bbfe"}}
+                      :sha "ab31be7491cae823d6f75fefa9e6726b2aba2c08"}}
 
  :aliases {:clj {:extra-deps {org.clojure/clojure {:mvn/version "1.10.1"}}}
 

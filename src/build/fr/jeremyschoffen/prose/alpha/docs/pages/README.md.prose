@@ -106,6 +106,9 @@ Cons:
 - May be a bit of a perf hit.
 - Managing the sci context makes for an api not as easy to use.
 
+## Mentions
+This work is of course inspired and influenced by ◊|pollen and ◊|scribble◊"."
+
 ## License
 
 Copyright © 2020 Jeremy Schoffen.

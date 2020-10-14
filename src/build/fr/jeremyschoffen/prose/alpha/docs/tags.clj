@@ -4,7 +4,6 @@
     [fr.jeremyschoffen.mbt.alpha.utils :as u]
     [fr.jeremyschoffen.prose.alpha.document.lib :as lib]
     [fr.jeremyschoffen.prose.alpha.out.markdown.tags :as md]
-    [fr.jeremyschoffen.prose.alpha.out.html.compiler :as cplr]
     [fr.jeremyschoffen.prose.alpha.reader.core :as reader]))
 
 (u/pseudo-nss project)
@@ -26,33 +25,37 @@
         lein (m/find mvn
                      {?n {:mvn/version ?v}}
                      [?n ?v])]
-    ["Deps coords:\n"
-     (md/code-block {:content-type "clojure"}
-       (binding [*print-namespace-maps* false]
-         (pr-str mvn)))
-     "\n"
+    [(when mvn
+       ["Deps coords:\n"
+        (md/code-block {:content-type "clojure"}
+                       (binding [*print-namespace-maps* false]
+                         (pr-str mvn)))
+        "\n"])
 
 
-     "Lein coords:\n"
-     (md/code-block {:content-type "clojure"}
-       (pr-str lein))
-     "\n"
+     (when mvn
+       ["Lein coords:\n"
+        (md/code-block {:content-type "clojure"}
+                       (pr-str lein))
+        "\n"])
 
-     "Git coords:\n"
-     (md/code-block {:content-type "clojure"}
-       (binding [*print-namespace-maps* false]
-         (pr-str git)))
-     "\n"]))
+     (when git
+       ["Git coords:\n"
+        (md/code-block {:content-type "clojure"}
+                       (binding [*print-namespace-maps* false]
+                         (pr-str git)))
+        "\n"])]))
 
 
 (defn reader-sample [path]
   (let [slurp-doc  (lib/get-slurp-doc)
         text (slurp-doc path)]
     (lib/<>
+      "The text:\n"
       (md/code-block
         text)
       "\n"
-      "Reads as:"
+      "reads as:"
       "\n"
       (md/code-block {:content-type "clojure"}
                      (pr-str (reader/read-from-string text))))))

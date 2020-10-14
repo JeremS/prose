@@ -1,7 +1,6 @@
 (ns fr.jeremyschoffen.prose.alpha.docs.evaluation
   (:require
     [clojure.java.io :as io]
-    [fr.jeremyschoffen.mbt.alpha.utils :as u]
 
     [fr.jeremyschoffen.prose.alpha.document.sci :as doc]
     [fr.jeremyschoffen.prose.alpha.document.sci.bindings :as bindings]
@@ -72,7 +71,7 @@
   (def doc
     (document "README.md.prose"
               {:project/coords
-               {:maven {'fr.jeremyschofffen/prose-alpha {:mvn/version "123456"}}}}))
+               {}}))
 
 
   (spit "README-test.MD" doc)

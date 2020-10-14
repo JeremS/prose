@@ -1,8 +1,5 @@
 (ns fr.jeremyschoffen.prose.alpha.docs.pages.readme.example-evaluation
   (:require
-    [clojure.java.io :as io]
-    [fr.jeremyschoffen.mbt.alpha.utils :as u]
-
     [fr.jeremyschoffen.prose.alpha.document.sci :as doc]
     [fr.jeremyschoffen.prose.alpha.document.sci.bindings :as bindings]
     [fr.jeremyschoffen.prose.alpha.eval.sci :as eval-sci]
@@ -42,6 +39,7 @@
   (-> example-src
       eval-doc
       cplr/compile!
+      clojure.string/trim
       (->> (spit example-dest))))
 
 

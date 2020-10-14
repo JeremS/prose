@@ -18,9 +18,8 @@ documents. The examples following will describe Prose from this angle.
 
 ### Syntax
 Prose provides a reader similar to what we can find in ◊|pollen◊"." Text is either plain text or a special construct.
-All special construct begin with the character `◊"◊"`(lozenge).
+All special constructs begin with the character `◊"◊"`(lozenge).
 
-There are several special construct allowing to embed clojure:
 #### Clojure calls:
 ◊reader-sample{readme/example-1.prose}
 
@@ -38,7 +37,7 @@ There are several special construct allowing to embed clojure:
 
 
 ### Prose as a preprocessor
-Prose provides some helper in defining html tag. These functions work as follow:
+Prose provides some helpers in defining html tag. These functions work as follow:
 ◊clojure-sample {readme/example-tags.clj}
 
 With this api we can create documents such as:
@@ -79,7 +78,7 @@ behaves as you'd expect, the ◊"◊" insisde the clojure string isn't special. 
 troubles with this character.
 
 For reference here is the answer in the case of pollen from
-[its documentation](https://docs.racket-lang.org/pollen/pollen-command-syntax.html#%28part._the-lozenge%29)
+[its documentation](https://docs.racket-lang.org/pollen/pollen-command-syntax.html#%28part._the-lozenge%29).
 
 
 ## Clojure vs sci evaluation
@@ -90,26 +89,25 @@ There are pros and cons to each approach.
 ### Clojure
 Pros:
 - An evaluation can use anything that is in the classpath making requiring namespaces easier.
-- The api may generally a bit easier to use
+- The api may generally a bit easier to use.
 
 Cons:
 - An evaluation can use anything that is in the classpath which isn't secure.
-- I believe clojure doesn't allow code run outside of its main thread to create / destroy namespaces
-- Porting that functionality to Clojurescript requires going self hosted (eval needs to be there)
+- I believe clojure doesn't allow code ran outside of its main thread to create / destroy namespaces.
+- Porting that functionality to Clojurescript requires going self hosted (eval needs to be there somehow).
 
 ### Sci
 Pros:
 - Runs in clojure and clojurescript
-- bringing it's own reifed environment sci evaluation can easily happen in a background thread
-- allows us to sandbox what's accessible to the code / document being evaluated
+- bringing it's own reifed environment sci evaluation can easily happen in a background thread.
+- allows us to sandbox what's accessible to the code / document being evaluated.
 
 Cons:
-- May be a bit of a perf hit
-- Managing the sci context makes for an api not as easy to use
+- May be a bit of a perf hit.
+- Managing the sci context makes for an api not as easy to use.
 
 ## License
 
 Copyright © 2020 Jeremy Schoffen.
 
 Distributed under the Eclipse Public License v 2.0.
-

@@ -10,7 +10,7 @@
     [fr.jeremyschoffen.prose.alpha.out.markdown.compiler :as cplr]
 
 
-    fr.jeremyschoffen.prose.alpha.out.html.tags
+    fr.jeremyschoffen.prose.alpha.docs.tags
     fr.jeremyschoffen.prose.alpha.out.html.tags))
 
 

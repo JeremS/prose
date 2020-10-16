@@ -210,15 +210,14 @@ Api providing several tools to use inside or outside of prose document.
                  :error-msg "Error inserting doc."})))
 
 
-(defmacro require-doc
+(defn require-doc
   "Insert the slurped and read and evaluated content of another document."
   [path]
   (apply <> (load* (comp (get-eval-doc)
                          (get-read-doc)
                          (get-slurp-doc))
                    {:path path
-                    :form &form
-                    :error-msg "Error inserting doc."})))
+                    :error-msg "Error requiring doc."})))
 
 
 

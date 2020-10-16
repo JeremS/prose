@@ -6,7 +6,7 @@ Alternate syntax for Clojure, similar to what [Pollen](https://github.com/mbutte
 ## Installation
 Git coords:
 ```clojure
-{fr.jeremyschoffen/prose-alpha {:git/url "https://github.com/JeremS/prose.git", :sha "117a23232df4d1af59ef0ca686b14dac16b8b060"}}
+{fr.jeremyschoffen/prose-alpha {:git/url "https://github.com/JeremS/prose.git", :sha "56f85b5fbd711efe6f0f1fc8ef02beb24159cb0e"}}
 ```
 
 

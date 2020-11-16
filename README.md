@@ -4,9 +4,17 @@
 Alternate syntax for Clojure, similar to what [Pollen](https://github.com/mbutterick/pollen) brings to [Racket](https://racket-lang.org/).
 
 ## Installation
+Deps coords:
+```clojure
+{fr.jeremyschoffen/prose-alpha {:mvn/version "7"}}
+```
+Lein coords:
+```clojure
+[fr.jeremyschoffen/prose-alpha "7"]
+```
 Git coords:
 ```clojure
-{fr.jeremyschoffen/prose-alpha {:git/url "https://github.com/JeremS/prose.git", :sha "56f85b5fbd711efe6f0f1fc8ef02beb24159cb0e"}}
+{fr.jeremyschoffen/prose-alpha {:git/url "https://github.com/JeremS/prose.git", :sha "b3354848462136241175b5c7fbe3dc000b2a46f1"}}
 ```
 
 

@@ -1,6 +1,7 @@
 .cljs_node_repl
 .cpcache
 /build
+/target
 node_modules
 /out
 scripts

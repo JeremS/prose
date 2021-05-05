@@ -14,7 +14,7 @@ Api providing several tools to use inside or outside of prose document.
 ;; Textually silent versions of clojure definitions
 ;;----------------------------------------------------------------------------------------------------------------------
 (defmacro def-s
-  "Same as `def` excpet that it returns and empty string."
+  "Same as `def` except that it returns and empty string."
   [& args]
   `(do
      (def ~@args)
@@ -22,14 +22,14 @@ Api providing several tools to use inside or outside of prose document.
 
 
 (defmacro defn-s [& args]
-  "Same as `defn` excpet that it returns and empty string."
+  "Same as `defn` except that it returns and empty string."
   `(do
      (defn ~@args)
      ""))
 
 
 (defmacro defmacro-s
-  "Same as `defmacro` excpet that it returns and empty string."
+  "Same as `defmacro` except that it returns and empty string."
   [& args]
   `(do
      (defmacro ~@args)

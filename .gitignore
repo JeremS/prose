@@ -1,5 +1,6 @@
 .cljs_node_repl
 .cpcache
+.lsp
 /build
 /target
 node_modules

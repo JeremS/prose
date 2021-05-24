@@ -80,6 +80,7 @@
 (comment
   (mbt-core/clean! conf)
 
+  (generate-docs! conf)
   (bump-project!)
 
   (mbt-build/build! conf)

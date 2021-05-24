@@ -20,7 +20,7 @@ Git coords:
 
 ## Usage
 The main idea is to provide a tool that allows the creation of textual documents in which clojure can be embedded.
-The way Prose goes about it is by flipping the relationship between palin text and code.
+The way Prose goes about it is by flipping the relationship between plain text and code.
 In a clojure file, text is assumed to be code except in special case like strings and comments.
 In prose, text is assumed to be just plain text except in special cases i.e. clojure code.
 

@@ -10,6 +10,7 @@ Api providing tools to facilitate the evaluation of documents.
   to be the input / environment of an evaluation."
   {:prose.alpha/env :clojure})
 
+
 (defn get-env
   "Get the evaluation environment or a specific `key` from it."
   ([]
@@ -80,12 +81,12 @@ Api providing tools to facilitate the evaluation of documents.
 (defn evaluate
   "Evaluate a sequence of forms in order. Returns the sequence of evaluations.
 
-  To do so an 'eval-forms' function is create from `ef`. This function is wrapped by `middleware` to then be passed
-  `forms` as parameter.
+  To do so an evaluation context is created using [[make-evaluation-ctxt]]. This context is passed to 
+  [[evaluate-ctxt]] that has been wrapped with `middleware`.
 
   Args:
   - `ef`: an 'evaluate-form' function that take 1 form and returns the result of evaluating it.
-  - `middleware`: an 'eval-forms -> eval-forms' function
+  - `middleware`: an 'evaluate-ctxt -> evaluate-ctxt' function
   - `forms`: the sequence to forms to evaluate"
   [ef middleware forms]
   (let [ctxt (make-evaluation-ctxt ef forms)
@@ -108,13 +109,14 @@ Api providing tools to facilitate the evaluation of documents.
 
 
 (defn wrap-eval-result
-  "Middleware that either returns the result of the evaluation or throw any error raised."
+  "Middleware that either returns the result of the evaluation or throws any error raised."
   [eval-ctxt]
   (fn [ctxt]
     (let [{:keys [result error]} (eval-ctxt ctxt)]
       (if result
         result
         (throw error)))))
+
 
 (comment
   (evaluate eval
@@ -212,6 +214,7 @@ Api providing tools to facilitate the evaluation of documents.
    (eval-forms eval forms))
   ([eval-form forms]
    (evaluate eval-form wrap-eval-forms forms)))
+
 
 (comment
   (eval-forms '[(println *ns*)

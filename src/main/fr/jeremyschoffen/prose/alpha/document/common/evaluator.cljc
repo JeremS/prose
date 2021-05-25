@@ -12,7 +12,7 @@ Generic API providing document evaluation utilities.
 
   Takes care of binding [[fr.jeremyschoffen.prose.alpha.eval.common/*evaluation-env*]] using its parameter.
 
-  This function take one argument which is a map. The keys are as follow:
+  This function takes one argument which is a map. The keys are as follow:
   - `path`: a string, the path to the document
   - `slurp-doc`: a function that takes a path to a file and return the text content of that file
   - `read-doc`: a reader / parser function, text in, code (data) out
@@ -62,3 +62,4 @@ Generic API providing document evaluation utilities.
        (eval-doc (assoc env
                    :prose.alpha.document/path path
                    :prose.alpha.document/input inputs))))))
+

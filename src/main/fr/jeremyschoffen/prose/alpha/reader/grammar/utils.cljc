@@ -54,6 +54,7 @@
   [g]
   (medley/map-vals instac/hide-tag g))
 
+
 (defn hide-tags
   "Selectively hide the tags of a grammar."
   [g tag-names]
@@ -76,3 +77,4 @@
       (select-keys tag-names)
       hide-all
       (->> (merge g))))
+

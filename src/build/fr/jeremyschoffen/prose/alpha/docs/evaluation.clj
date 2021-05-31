@@ -53,7 +53,7 @@
 
 
 (def eval-doc (doc/make-evaluator {:slurp-doc slurp-doc
-                                   :read-doc reader/read-from-string
+                                   :read-doc read-doc
                                    :eval-forms eval-forms}))
 
 
@@ -62,7 +62,7 @@
    (document path {}))
   ([path input]
    (-> path
-       (eval-doc (merge input {::slurp-doc slurp-doc}))
+       (eval-doc input)
        cplr/compile!)))
 
 
@@ -74,6 +74,7 @@
                {}}))
 
 
+  (println doc)
   (spit "README-test.MD" doc)
 
   (-> *e

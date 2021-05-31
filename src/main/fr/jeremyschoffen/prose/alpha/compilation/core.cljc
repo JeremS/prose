@@ -138,6 +138,8 @@ Api providing generic compilation utilities.
           This function dispatches on a pair of value constructed like this:
           `[(:name *implementation*) (:tag node)]`, `node` being a map, the only argument of the function."
           (fn [node] [(:name *implementation*) (:tag node)]))
+
+
 (defmethod emit-tag! :default [s] ((:default-emit-tag! *implementation*) s))
 
 
@@ -152,12 +154,15 @@ Api providing generic compilation utilities.
           This function dispatches on a pair of value constructed like this:
           `[(:name *implementation*) (:type node)]`, `node` being a map, the only argument of the function."
           (fn [node] [(:name *implementation*) (:type node)]))
+
+
 (defmethod emit-special! :default [s] ((:default-emit-special! *implementation*) s))
 
 
-(defn emit-doc! [node]
+(defn emit-doc!
   "Emit a document to [[*compilation-out*]].
   The [[*implementation*]] also needs to be bound."
+  [node]
   (cond
     (lib/special? node) (emit-special! node)
     (lib/tag? node) (emit-tag! node)

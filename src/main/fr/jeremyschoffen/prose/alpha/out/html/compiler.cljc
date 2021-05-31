@@ -121,6 +121,8 @@ to compile to html.
 ;; implementation
 ;;----------------------------------------------------------------------------------------------------------------------
 (derive ::html ::common/default)
+
+
 (def implementation
   "Html implementation of our generic compiler, this is meant to a binding to
   [[fr.jeremyschoffen.prose.alpha.compilation.core]]."

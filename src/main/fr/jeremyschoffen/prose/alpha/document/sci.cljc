@@ -13,6 +13,12 @@ API providing evaluation tools to evaluate document using Sci.
     fr.jeremyschoffen.prose.alpha.document.lib))
 
 
+(defmacro make-ns-bindings
+  "Alias for the [[fr.jeremyschoffen.prose.alpha.document.sci.bindings/make-ns-bindings]] macro."
+  [& body]
+  `(sci-bindings/make-ns-bindings ~@body))
+
+
 (def sci-opt-doc-ns
   "Default namespaces bindings options passed to sci when making a sci evaluation context.
 
@@ -45,13 +51,13 @@ API providing evaluation tools to evaluate document using Sci.
       :namespaces
       (get 'fr.jeremyschoffen.prose.alpha.document.lib))
 
-  (def load-doc (fn [path]
-                  (-> path
-                      io/resource
-                      slurp
-                      reader/read-from-string)))
+  (def slurp-doc (fn [path]
+                   (-> path
+                       io/resource
+                       slurp)))
 
-  (def eval-doc (make-evaluator {:load-doc load-doc
+  (def eval-doc (make-evaluator {:slurp-doc slurp-doc
+                                 :read-doc reader/read-from-string
                                  :eval-forms (partial eval-sci/eval-forms-in-temp-ns ctxt)}))
 
   (eval-doc "complex-doc/master.prose")

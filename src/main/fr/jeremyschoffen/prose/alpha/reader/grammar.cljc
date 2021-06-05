@@ -250,8 +250,8 @@ With the exception of some details, this is how this namespace is organized."}
                                   (instac/nt :clojure-string)
                                   (instac/nt :embedded))
 
-   :brace-enclosed (gu/enclosed (-> open-brace instac/string instac/hide)
-                                (-> close-brace instac/string instac/hide)
+   :brace-enclosed (gu/enclosed (instac/string  open-brace)
+                                (instac/string close-brace)
                                 (instac/nt :brace-enclosed)
                                 (instac/nt :tag-text-arg-text)
                                 (instac/nt :embedded))})
@@ -366,5 +366,11 @@ With the exception of some details, this is how this namespace is organized."}
   (parser "◊◊div{wanted to use the ◊\"}\" char}")
 
   (parser "◊[]")
-  (parser "◊{}"))
+  (parser "◊{}")
+  (def ex3
+    "◊code{
+      (defn toto [{:keys [a b c]}]
+        [a b c])
+     }")
+  (parser ex3))
 

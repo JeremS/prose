@@ -168,6 +168,8 @@ The different syntactic elements are processed as follows:
 (defmethod clojurize* :tag-text-arg [node]
   (add-type (->> node
                  :content
+                 rest
+                 butlast
                  (mapv clojurize))
             :tag-text-arg))
 
@@ -259,4 +261,15 @@ The different syntactic elements are processed as follows:
        (map meta))
 
   (read-from-string "◊[ 1 2 3 a]")
-  (read-from-string "◊str◊{some str}"))
+  (read-from-string "◊str◊{some str}")
+  (def ex2
+    "◊code{
+      (defn toto [{:keys [a b c]}]
+        [a b c])
+     }")
+  (g/parser ex2)
+  (-> ex2
+      read-from-string
+      pr-str
+      println))
+

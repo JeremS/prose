@@ -118,43 +118,45 @@
 
 
   (testing "Tag function"
-    (is (= (g/parser "some text ◊div [:classes [:c1 :c2]] {some text in div ◊div} other")
-           '{:tag :doc,
+    (is (= '{:tag :doc,
              :content ("some text "
                         {:tag :tag,
                          :content ({:tag :tag-name, :content ("div")}
                                    {:tag :tag-clj-arg, :content ("[" ":classes " "[" ":c1 :c2" "]" "]")}
-                                   {:tag :tag-text-arg, :content ("some text in div " {:tag :tag, :content ({:tag :tag-name, :content ("div")})})})}
-                        " other")}))
+                                   {:tag :tag-text-arg, :content ("{" "some text in div " {:tag :tag, :content ({:tag :tag-name, :content ("div")})} "}")})}
+                        " other")}
+           (g/parser "some text ◊div [:classes [:c1 :c2]] {some text in div ◊div} other")))
 
-    (is (= (g/parser "some text ◊◊div [:classes [:c1 :c2]] {some text in div ◊div} other")
-           '{:tag :doc,
+    (is (= '{:tag :doc,
              :content ("some text "
                         {:tag :tag-unspliced,
                          :content ({:tag :tag-name, :content ("div")}
                                    {:tag :tag-clj-arg, :content ("[" ":classes " "[" ":c1 :c2" "]" "]")}
-                                   {:tag :tag-text-arg, :content ("some text in div " {:tag :tag, :content ({:tag :tag-name, :content ("div")})})})}
-                        " other")}))))
+                                   {:tag :tag-text-arg, :content ("{" "some text in div " {:tag :tag, :content ({:tag :tag-name, :content ("div")})} "}")})}
+                        " other")}
+           (g/parser "some text ◊◊div [:classes [:c1 :c2]] {some text in div ◊div} other")))))
 
 
 (deftest recursive-use
-  (is (= (g/parser "Some text ◊div { in div ◊\"◊\" ◊div [:a ◊(str \"a\\\"b\")] }")
-         '{:tag :doc,
+  (is (= '{:tag :doc,
            :content ("Some text "
                       {:tag :tag,
                        :content ({:tag :tag-name, :content ("div")}
                                  {:tag :tag-text-arg,
-                                  :content (" in div "
-                                             "◊"
-                                             " "
-                                             {:tag :tag,
-                                              :content ({:tag :tag-name, :content ("div")}
-                                                        {:tag :tag-clj-arg,
-                                                         :content ("["
-                                                                    ":a "
-                                                                    {:tag :clojure-call, :content ("(" "str " "\"a\\\"b\"" ")")}
-                                                                    "]")})}
-                                             " ")})})})))
+                                  :content ("{"
+                                            " in div "
+                                            "◊"
+                                            " "
+                                            {:tag :tag,
+                                             :content ({:tag :tag-name, :content ("div")}
+                                                       {:tag :tag-clj-arg,
+                                                        :content ("["
+                                                                   ":a "
+                                                                   {:tag :clojure-call, :content ("(" "str " "\"a\\\"b\"" ")")}
+                                                                   "]")})}
+                                            " "
+                                            "}")})})}
+        (g/parser "Some text ◊div { in div ◊\"◊\" ◊div [:a ◊(str \"a\\\"b\")] }"))))
 
 
 

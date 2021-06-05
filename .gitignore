@@ -7,3 +7,5 @@ node_modules
 /out
 scripts
 .nrepl-port
+package-lock.json
+package.json

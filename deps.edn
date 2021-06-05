@@ -1,29 +1,29 @@
 {:paths ["src/main"]
 
  :deps {instaparse/instaparse    {:mvn/version "1.4.10"}
-        borkdude/edamame         {:mvn/version "0.0.11-alpha.14"}
-        borkdude/sci {:mvn/version "0.1.1-alpha.9"}
-        meander/epsilon          {:mvn/version "RELEASE"}
+        borkdude/edamame         {:mvn/version "0.0.11"}
+        borkdude/sci             {:mvn/version "0.2.5"}
+        meander/epsilon          {:mvn/version "0.0.602"}
         medley/medley            {:mvn/version "1.3.0"}
         net.cgrand/macrovich     {:mvn/version "0.2.1"}
-        lambdaisland/regal       {:mvn/version "0.0.89"}}
+        lambdaisland/regal       {:mvn/version "0.0.97"}}
 
 
- :aliases {:clj {:extra-deps {org.clojure/clojure {:mvn/version "1.10.1"}}}
+ :aliases {:clj {:extra-deps {org.clojure/clojure {:mvn/version "1.10.3"}}}
 
-           :cljs {:extra-deps {org.clojure/clojurescript {:mvn/version "1.10.520"}}}
+           :cljs {:extra-deps {org.clojure/clojurescript {:mvn/version "1.10.866"}}}
 
            :dev {:extra-paths ["dev"]}
 
-           :nrepl  {:extra-deps {nrepl/nrepl      {:mvn/version "0.8.2"}}}
+           :nrepl  {:extra-deps {nrepl/nrepl      {:mvn/version "0.8.3"}}}
 
-           :piggie {:extra-deps {cider/piggieback {:mvn/version "0.5.0"}}}
+           :piggie {:extra-deps {cider/piggieback {:mvn/version "0.5.2"}}}
 
-           :reveal {:extra-deps {vlaaad/reveal {:mvn/version "1.0.130"}}}
+           :reveal {:extra-deps {vlaaad/reveal {:mvn/version "1.3.209"}}}
 
            :test {:extra-paths ["test" "test-resources"]
-                  :extra-deps {lambdaisland/kaocha {:mvn/version "0.0-541"}
-                               lambdaisland/kaocha-cljs {:mvn/version "0.0-51"}}}
+                  :extra-deps {lambdaisland/kaocha {:mvn/version "1.0.861"}
+                               com.lambdaisland/kaocha-cljs {:mvn/version "1.0.93"}}}
 
            :build {:extra-paths ["build" "src/build"]
                    :extra-deps {fr.jeremyschoffen/mbt-alpha {:mvn/version "14"}}}}}

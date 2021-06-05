@@ -21,8 +21,9 @@ Api providing several tools to use inside or outside of prose document.
      ""))
 
 
-(defmacro defn-s [& args]
+(defmacro defn-s
   "Same as `defn` except that it returns and empty string."
+  [& args]
   `(do
      (defn ~@args)
      ""))
@@ -162,6 +163,7 @@ Api providing several tools to use inside or outside of prose document.
   ([k]
    (eval-common/get-env k)))
 
+
 (defn get-input
   "Get the input value from the evaluation environment."
   []
@@ -174,10 +176,22 @@ Api providing several tools to use inside or outside of prose document.
   (get-env :prose.alpha.document/slurp-doc))
 
 
+(defn slurp-doc
+  "Slurp a document using the function given by [[get-slurp-doc]]."
+  [& args]
+  (apply (get-slurp-doc) args))
+
+
 (defn get-read-doc
   "Get the reading function from the evaluation environment."
   []
   (get-env :prose.alpha.document/read-doc))
+
+
+(defn read-doc
+  "Read a string using the function given by [[get-read-doc]]."
+  [& args]
+  (apply (get-read-doc) args))
 
 
 (defn get-eval-doc
@@ -185,6 +199,11 @@ Api providing several tools to use inside or outside of prose document.
   []
   (get-env :prose.alpha.document/eval-forms))
 
+
+(defn eval-doc
+  "Eval a document using the function given by [[get-eval-doc]]."
+  [& args]
+  (apply (get-eval-doc) args))
 
 
 (defn- load* [load-doc {path :path
@@ -203,19 +222,16 @@ Api providing several tools to use inside or outside of prose document.
   "Insert the slurped and read content of another document."
   [path]
   (apply <>
-         (load* (comp (get-read-doc)
-                      (get-slurp-doc))
+         (load* (comp read-doc slurp-doc)
                 {:path path
                  :form &form
                  :error-msg "Error inserting doc."})))
 
 
 (defn require-doc
-  "Insert the slurped and read and evaluated content of another document."
+  "Insert the slurped, read and evaluated content of another document."
   [path]
-  (apply <> (load* (comp (get-eval-doc)
-                         (get-read-doc)
-                         (get-slurp-doc))
+  (apply <> (load* (comp eval-doc read-doc slurp-doc)
                    {:path path
                     :error-msg "Error requiring doc."})))
 

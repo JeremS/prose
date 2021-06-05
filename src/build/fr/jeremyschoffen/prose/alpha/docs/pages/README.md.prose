@@ -7,18 +7,16 @@ Alternate syntax for Clojure, similar to what ◊|pollen brings to ◊|racket◊
 ◊project-coords
 
 ## Usage
-The main idea is to provide a tool that allows the creation of textual documents in which clojure can be embedded.
-The way Prose goes about it is by flipping the relationship between plain text and code.
-In a clojure file, text is assumed to be code except in special case like strings and comments.
-In prose, text is assumed to be just plain text except in special cases i.e. clojure code.
-
-One of the main use of Prose is to use it as a text processor when wanting to generate different kinds of text
-documents. The examples following will describe Prose from this angle.
-
+The main idea is to have programmable documents in Clojure. To do so, Prose
+flips the relationship between plain text and code. In a clojure file, text is
+assumed to be code except in special cases like strings and comments.
+In prose, text is assumed to be just plain text except in special cases i.e.
+clojure code.
 
 ### Syntax
-Prose provides a reader similar to what we can find in ◊|pollen◊"." Text is either plain text or a special construct.
-All special constructs begin with the character `◊"◊"`(lozenge).
+Prose provides a reader similar to what we can find in ◊|pollen◊"." Text is
+either plain text or a special construct. All special constructs begin with
+the character `◊"◊"`(lozenge).
 
 #### Clojure calls:
 ◊reader-sample{readme/example-1.prose}
@@ -36,78 +34,159 @@ All special constructs begin with the character `◊"◊"`(lozenge).
 ◊reader-sample{readme/example-4.prose}
 
 
-### Prose as a preprocessor
-Prose provides some helpers in defining html tag. These functions work as follow:
-◊clojure-sample {readme/example-tags.clj}
+### Documents as programs
+To get programmable documents prose provides several apis that are meant to
+work together. We have:
+- a reader turning text into code as data
+- an API help to evaluate that data using Clojure's eval capabilities
+- an API to compile the result of evaluations into the final document
 
-With this api we can create documents such as:
+Let's see the whole process in action. We start by requiring the necessary
+apis and setting up a little helper:
+◊code-s {
+(require '[clojure.java.io :as io])
+(require '[clojure.pprint :as pp])
+(require '[fr.jeremyschoffen.prose.alpha.reader.core :as reader])
+(require '[fr.jeremyschoffen.prose.alpha.eval.common :as eval-common])
+(require '[fr.jeremyschoffen.prose.alpha.out.html.compiler :as html-compiler])
+}
+
+◊code-s {
+(defn display [x]
+  (with-out-str
+    (pp/pprint x)))
+}
+
+This is the document we are using for our example:
 ◊text-sample {readme/example-doc.html.prose}
 
-This document would result in the following html:
-◊html-sample {readme/example-doc.html}
+Let's read it:
+◊code{
+(def document
+  (-> "fr/jeremyschoffen/prose/alpha/docs/pages/readme/example-doc.html.prose"
+    io/resource
+    slurp
+    reader/read-from-string))
 
-To do so we use Prose's apis this way:
-◊clojure-sample {readme/example_evaluation.clj}
+(display document)
+}
+
+Eval it:
+◊code{
+(def evaled-document (eval-common/eval-forms-in-temp-ns document))
+
+(display evaled-document)
+}
+
+Compile it to html:
+◊code{
+(html-compiler/compile! evaled-document)
+}
+
+There are some helpers to make this process easier:
+◊code-s{
+(require '[fr.jeremyschoffen.prose.alpha.document.clojure :as doc])
+}
+◊code{
+(defn slurp-doc [path]
+  (-> path
+    io/resource
+    slurp))
+
+(def evaluate (doc/make-evaluator {:slurp-doc slurp-doc
+                                   :read-doc reader/read-from-string
+                                   :eval-doc eval-common/eval-forms-in-temp-ns}))
+(-> "fr/jeremyschoffen/prose/alpha/docs/pages/readme/example-doc.html.prose"
+  evaluate
+  html-compiler/compile!)
+}
+
+The namespaces `fr.jeremyschoffen.prose.alpha.document.*` provide more
+functionality than just composing `slurp`, `read` and `eval` functions.
+The `make-evaluator` functions there sets up the possibility
+for documents to import other documents, passing input data to documents...
 
 
 ## The ◊"◊" (lozenge) character
-The first question that came to mind when I discovered ◊|pollen was: why this `◊"◊"` character? I expect
-the same question will arise for this project.
+One of the first question that came to mind when I discovered ◊|pollen was:
+why this `◊"◊"` character? I expect the same question will arise for this
+project.
 
-◊|pollen and Prose use `◊"◊"` for several reasons. Mainly this character isn't used as a special character in
-programming languages. To stick to clojure, characters like `@`, `#` or even `&` have special meaning.
-`◊"◊"` not being used either in clojure nor very much in plain text allows us to have expressions such as:
+◊|pollen and Prose use `◊"◊"` for several reasons. Mainly this character
+isn't used as a special character in programming languages. To stick to
+Clojure, characters like `@`, `#` or even `&` have special meaning.
+`◊"◊"` not being used either in clojure nor very much in plain text allows
+us to have expressions such as:
 ```text
 ◊"◊(defn template [v]
    ◊div { Some value: ◊|v})"
 ```
 
-In this example there is prose syntax used inside clojure code without ambiguity. Using the `@` as
-◊|scribble does would cause problems:
+In this example there is prose syntax used inside clojure code without
+ambiguity. Using the `@` as ◊|scribble does would cause problems:
 ```text
 @(defn template [v]
    @div { Some value: @|v})
 ```
 
-In that case which `@` hold Prose's meaning and which are a `deref` reader macro? Using `◊"◊"` gets us out of most of
-these problems. When we want to use `◊"◊"` as text we can use the escaping/verbatim syntax `◊"◊""◊"◊""`. Also this:
+In that case which `@` hold Prose's meaning and which are a `deref` reader
+macro? Using `◊"◊"` gets us out of most of these problems. When we want to
+use `◊"◊"` as text we can use the escaping/verbatim syntax `◊"◊""◊"◊""`.
+Also this:
 ```text
 ◊"◊(str \"◊\")"
 ```
-behaves as you'd expect, the ◊"◊" insisde the clojure string isn't special. That should be the extent of our
-troubles with this character.
+behaves as you'd expect, the ◊"◊" insisde the clojure string isn't special.
+That should be the extent of our troubles with this character.
 
 For reference here is the answer in the case of pollen from
 [its documentation](https://docs.racket-lang.org/pollen/pollen-command-syntax.html#%28part._the-lozenge%29).
 
 
 ## Clojure vs sci evaluation
-Prose provides 2 apis to evaluate code. The first one uses Clojure's eval function. The second uses ◊|sci◊"."
+Currently Prose provides 2 apis to evaluate code. The first one uses Clojure's
+eval function. The second uses ◊|sci◊"."
 
 There are pros and cons to each approach.
 
 ### Clojure
 Pros:
-- An evaluation can use anything that is in the classpath making requiring namespaces easier.
-- The api may generally a bit easier to use.
+- An evaluation can use anything that is in the classpath making requiring
+  namespaces easier.
+- The api may generally be a bit easier to use.
 
 Cons:
 - An evaluation can use anything that is in the classpath which isn't secure.
-- I believe clojure doesn't allow code ran outside of its main thread to create / destroy namespaces.
-- Porting that functionality to Clojurescript requires going self hosted (eval needs to be there somehow).
+- I believe clojure doesn't allow code ran outside of its main thread to
+  create / destroy namespaces.
+- Porting that functionality to Clojurescript requires going self hosted
+  (eval needs to be there somehow).
 
 ### Sci
 Pros:
 - Runs in clojure and clojurescript
-- bringing it's own reifed environment sci evaluation can easily happen in a background thread.
-- allows us to sandbox what's accessible to the code / document being evaluated.
+- Bringing it's own reifed environment, ◊|sci evaluations can easily happen in
+  several threads.
+- Allows us to sandbox what's accessible to the code / document being evaluated.
 
 Cons:
 - May be a bit of a perf hit.
 - Managing the sci context makes for an api not as easy to use.
 
+### Limitations
+At the moment using Clojure's shortened syntax for namespace qualified keywords
+is a bit tricky to use, it requires knowledge of namespace aliases before
+reading documents. The main reader function, using
+[edamame](https://github.com/borkdude/edamame) under the hood accepts
+options passed down to edamame allowing this shortened syntax.
+(see the docstring of ◊sym[reader/read-from-string] and
+[edamame's docs](https://github.com/borkdude/edamame#auto-resolve))
+
+
 ## Mentions
 This work is of course inspired and influenced by ◊|pollen and ◊|scribble◊"."
+The [enlive](https://github.com/cgrand/enlive) library and ClojureScript are also
+a big source of inspiration where document compilation is concerned.
 
 ## License
 

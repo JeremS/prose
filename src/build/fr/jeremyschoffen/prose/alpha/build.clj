@@ -44,7 +44,8 @@
                         ::project/maven-coords mbt-defaults/deps-make-maven-coords)
       (assoc-in [::git/commit! ::git.commit/message] "Generated the docs.")
       (mbt-defaults/generate-then-commit!
-        (u/do-side-effect! docs/make-readme!))))
+        (u/do-side-effect! docs/make-readme!)
+        (u/do-side-effect! docs/make-design-docs!))))
 
 
 (u/spec-op generate-docs!

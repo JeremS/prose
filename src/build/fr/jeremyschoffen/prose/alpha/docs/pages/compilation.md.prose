@@ -1,0 +1,193 @@
+◊(require '[clojure.pprint :as pp])
+◊(require '[fr.jeremyschoffen.prose.alpha.compilation.core :as compilation])
+◊(require '[fr.jeremyschoffen.prose.alpha.document.lib :as lib])
+◊(require '[fr.jeremyschoffen.prose.alpha.docs.tags :as t])
+◊(require '[fr.jeremyschoffen.prose.alpha.out.html.tags :as html])
+◊(require '[fr.jeremyschoffen.prose.alpha.out.html.compiler :as html-cplr])
+◊(require '[fr.jeremyschoffen.prose.alpha.out.markdown.tags :as md])
+◊(require '[fr.jeremyschoffen.prose.alpha.out.markdown.compiler :as md-cplr])
+
+# Compiling documents
+Prose provides APIs to compile data to text. The general idea being that the
+result of reading then evaluating a document is data that can be compiled. The
+shape of this data is modeled after the enlive or core.xml format. The
+compilation APIs deal with trees of maps. These maps come usually with the key:
+- `:type`: the type of the tag, for instance `:tag` or `:dtd`
+
+The rest of the keys depends on the type of the map. In the case of the type
+`:tag`:
+- `:tag`: the name of a tag, for instance `:p` or `:h1`
+- `:attrs`: a map of attributes
+- `:content`: children of the tag, a sequence of strings or maps. Sequences are
+  'spliced' in
+
+
+The namespace ◊t/sym[compilation] provides a set of generic functions that
+make our compilation algorithm. There are several goals here:
+- being able to derive compilers from one another, for instance the Markdown
+  compiler is based on the HTML one
+- being able to specify default behaviors and openly extend special cases where
+  needed
+
+## The basic `emit!` mechanism
+At the base level, documents are compiled by emitting text to an output stored
+in the dynamic variable ◊t/sym[compilation/*compilation-out*]. Outputs are
+implementations of the `Output` protocol.
+◊(t/source compilation/Output)
+
+
+We have Clojure and ClojureScript implementations of this protocol using
+a `StringBuilder` in java and a `StringBuffer` in javascript:
+◊(t/source compilation/text-output)
+
+
+The ◊t/sym[compilation/emit!] function is the low level primitive of our
+compiler:
+◊(t/source compilation/emit!)
+
+There is a helper macro to emit to a text buffer:
+◊(t/source compilation/text-environment)
+
+We can then emit some text:
+◊t/code{
+  (compilation/text-environment
+    (compilation/emit! "hello")
+    (compilation/emit! " " "world")
+    (compilation/emit! "!"))
+}
+
+## Generic compilation functions
+Our basic emit machinery is used to create a generic compiler. The entry point
+of our document compiler is the ◊t/sym[compilation/emit-doc!] function.
+◊(t/source compilation/emit-doc!)
+
+We distinguish 4 cases for which we dispatch recursively to less generic
+emit functions.
+
+- ◊t/sym[compilation/emit-seq!] is pretty straightforward:
+◊(t/source compilation/emit-seq!)
+
+- ◊t/sym[compilation/emit-str!] emits text using the current implementation:
+◊(t/source compilation/emit-str!)
+
+- ◊t/sym[compilation/emit-tag!] emits maps of type `:tag`:
+◊(t/source compilation/emit-tag!)
+◊t/clj{
+(defmethod emit-tag! :default [s] ((:default-emit-tag! *implementation*) s))
+}
+
+- ◊t/sym[compilation/emit-special!] emits maps of other types:
+◊(t/source compilation/emit-special!)
+◊t/clj{
+(defmethod emit-special! :default [s] ((:default-emit-special! *implementation*) s))
+}
+
+In these generic functions the dynamic var `*implementation*` is used:
+◊(t/source compilation/*implementation*)
+
+It allows us to declare a names for implementations and default behaviors when it comes
+to emits strings, regular and classic tags.
+
+The implementation name is used in the dispatch schemes of the
+◊t/sym[compilation/emit-tag!] and ◊t/sym[compilation/emit-special!] multimethods.
+This allows us to have different compilation results of tags of the same name depending
+on the implementation.
+
+
+## Usage
+Prose provides several compilation targets using the generic compiler.
+Exploring the HTML and Markdown targets may help in understanding this design
+that uses an 'implementation map' and multimethods.
+
+### The HTML target
+At its low level the HTML compiler in ◊t/sym[html-cplr] is using code mostly
+inspired from the enlive library. There are specific functions for emitting
+different types of data:
+- escaped text: ◊t/sym[html-cplr/xml-str]
+- HTML attributes: ◊t/sym[html-cplr/attr-str]
+- regular tags: ◊t/sym[html-cplr/emit-tag!]
+- HTML comments: ◊t/sym[html-cplr/emit-comment!]
+- ...
+
+At a higher level these functions are wired in the generic mechanism.
+For instance:
+◊t/clj{
+(defmethod common/emit-special! [::html :comment] [x]
+  (emit-comment! x))
+}
+
+There is the implementation for HTML:
+◊(t/source html-cplr/emit-str!)
+◊(t/source html-cplr/implementation)
+
+With this implementation:
+- strings are escaped when emitted using ◊t/sym[html-cplr/emit-str!]
+- by default tags are compiled with ◊t/sym[html-cplr/emit-tag!]
+
+Finally we define a compilation function:
+◊(t/source html-cplr/compile!)
+
+
+### The markdown target
+Having markdown as a compilation target proves convenient when it comes to
+writing readmes or even documentation for projects. The way the format works
+is by providing alternative syntaxes for several HTML tags and using regular
+HTML syntax for the rest.
+
+Capitalizing on the closeness of the 2 formats our Markdown compiler that lives
+in the ◊t/sym[md-cplr] namespace just derives the HTML one and tweak it a bit.
+
+Here is the code to override the compilation behavior for links:
+◊t/clj{
+(defmethod common/emit-tag!  [::md :a] [{:keys [attrs content]}]
+  (let [href (get attrs :href)]
+    (emit! \[)
+    (if (seq content)
+      (emit-seq! content)
+      (emit! href))
+    (emit! \])
+    (emit! \( href \))))
+}
+
+The fact that the generic ◊t/sym[compilation/emit-tag!] multimethod dispatches
+on `[(:name fr...compilation.core/*implementation*) :a]` starts to
+make sense. Instead, if the dispatch was just on the tag name, loading this
+namespace would alter the compilation of links for all compilation targets.
+
+We have a compilation scheme for a custom tag:
+◊t/clj{
+(defmethod common/emit-tag! [::md ::tags/code-block] [node]
+  (let [{:keys [attrs content]} node
+        type (get attrs :content-type "text")]
+    (emit-block! type content)))
+}
+
+The behavior for the `:comment` special tag is changed, we emit nothing since
+there aren't comment in Markdown:
+◊t/clj{
+(defmethod common/emit-special! [::md :comment] [_])
+}
+
+The name of this implementation derive from the name of the HTML compiler:
+◊t/clj{
+(derive ::md ::html-cplr/html)
+}
+
+This way, any call to ◊t/sym[compilation/emit-tag!] that would
+dispatch on `[::md :custom-tag]` can more generaly be caught by
+`[::html-cplr/html :custom-tag]`. In other words, any custom tag with a custom
+compilation will be re-used with this implementation.
+
+The implementation map looks like this:
+◊(t/source md-cplr/implementation)
+
+The default compilation functions for strings and regular tags are set up in a
+way to deal with escaping special characters:
+- in Markdown proper no need to escape strings and so we use
+  ◊t/sym[compilation/emit!]
+- general html tags however won't go through escaping though so we re-instate
+  escaping for them using ◊t/sym[md-cplr/emit-tag!]
+◊(t/source md-cplr/emit-tag!)
+
+Finally there is a compile to text function:
+◊(t/source md-cplr/compile!)

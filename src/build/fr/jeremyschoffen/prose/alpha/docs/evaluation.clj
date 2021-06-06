@@ -2,15 +2,11 @@
   (:require
     [clojure.java.io :as io]
 
-    [fr.jeremyschoffen.prose.alpha.document.sci :as doc]
-    [fr.jeremyschoffen.prose.alpha.document.sci.bindings :as bindings]
-    [fr.jeremyschoffen.prose.alpha.eval.sci :as eval-sci]
+    [fr.jeremyschoffen.prose.alpha.document.clojure :as doc]
+    [fr.jeremyschoffen.prose.alpha.eval.common :as eval-common]
     [fr.jeremyschoffen.prose.alpha.reader.core :as reader]
-    [fr.jeremyschoffen.prose.alpha.out.markdown.compiler :as cplr]
+    [fr.jeremyschoffen.prose.alpha.out.markdown.compiler :as cplr]))
 
-
-    fr.jeremyschoffen.prose.alpha.docs.tags
-    fr.jeremyschoffen.prose.alpha.out.html.tags))
 
 
 (defn wrap-exception [f phase]
@@ -39,17 +35,7 @@
 (def read-doc (wrap-exception reader/read-from-string :read))
 
 
-(def sci-nss {:namespaces
-              (bindings/make-ns-bindings
-                fr.jeremyschoffen.prose.alpha.docs.tags
-                fr.jeremyschoffen.prose.alpha.out.html.tags)})
-
-
-
-(def sci-ctxt (doc/init sci-nss))
-
-
-(def eval-forms (wrap-exception (partial eval-sci/eval-forms-in-temp-ns sci-ctxt) :eval))
+(def eval-forms (wrap-exception (partial eval-common/eval-forms-in-temp-ns) :eval))
 
 
 (def eval-doc (doc/make-evaluator {:slurp-doc slurp-doc
@@ -74,11 +60,6 @@
                {}}))
 
 
-  (println doc)
   (spit "README-test.MD" doc)
-
-  (-> *e
-      ex-cause)
-      ;ex-data)
 
   (slurp-doc "readme/example-tags.clj"))

@@ -4,7 +4,7 @@
     [fr.jeremyschoffen.prose.alpha.document.sci.bindings :as bindings]
     [fr.jeremyschoffen.prose.alpha.eval.sci :as eval-sci]
     [fr.jeremyschoffen.prose.alpha.reader.core :as reader]
-    [fr.jeremyschoffen.prose.alpha.out.markdown.compiler :as cplr]
+    [fr.jeremyschoffen.prose.alpha.out.html.compiler :as cplr]
 
 
     fr.jeremyschoffen.prose.alpha.out.html.tags))

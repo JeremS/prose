@@ -30,9 +30,9 @@ Generic API providing document evaluation utilities.
   "Make an evaluation function that uses [[eval-doc]] under the hood.
 
   Takes a map as an argument with the following keys:
-  - `slurp-doc`: a function that takes a path to a file and return the text content of that file
-  - `read-doc`: a reader / parser function, text in, code (data) out
-  - `eval-forms`: an evaluation function, takes a sequence of forms and returns the sequence of evaluations
+  - `:slurp-doc`: a function that takes a path to a file and return the text content of that file
+  - `:read-doc`: a reader function, text in, code (data) out
+  - `:eval-forms`: an evaluation function, takes a sequence of forms and returns the sequence of evaluations
 
   Returns a function that takes a path and optionally some input as arguments and returns the evaluated document.
   The input if present is added to [[fr.jeremyschoffen.prose.alpha.eval.common/*evaluation-env*]] under the key

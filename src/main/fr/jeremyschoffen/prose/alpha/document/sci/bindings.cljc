@@ -32,7 +32,7 @@
 
 
 (defmacro bindings
-  "Extract bindings using `ns-publics` and using [[publics->bindings]] the result.
+  "Extract bindings by using [[publics->bindings]] on the result of `ns-publics`.
 
   The vars returned by `ns-publics` (the map's values) are de-referenced, in the case of macros
   the `sci/macro` metadata is added."

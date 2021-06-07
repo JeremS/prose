@@ -22,7 +22,7 @@ API providing evaluation tools to evaluate document using Sci.
 (def sci-opt-doc-ns
   "Default namespaces bindings options passed to sci when making a sci evaluation context.
 
-  Here the [[fr.jeremyschoffen.prose.alpha.document.lib]]is made avalable from inside document by default."
+  Here the [[fr.jeremyschoffen.prose.alpha.document.lib]] is made avalable from inside document by default."
   {:namespaces (sci-bindings/make-ns-bindings fr.jeremyschoffen.prose.alpha.document.lib)})
 
 

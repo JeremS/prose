@@ -58,7 +58,7 @@ Api providing tools to facilitate the evaluation of documents.
 
   This context is a map of 2 keys:
   - `:forms`: a sequence of forms to evaluate
-  - `eval-form`: a function that evaluates one form"
+  - `:eval-form`: a function that evaluates one form"
   [eval-form forms]
   {:forms forms
    :eval-form (wrap-eval-form-exception eval-form)})
@@ -66,8 +66,8 @@ Api providing tools to facilitate the evaluation of documents.
 
 (defn evaluate-ctxt
   "Function evaluating a context (produced by [[make-evaluation-ctxt]]).
-  Returns the context with a new key associated:
-  - `:result`: in the case of a successful evaluation the sequence of evaluation is returned here
+  Returns the context with one of two keys associated:
+  - `:result`: in the case of a successful evaluation the sequence of evaluations is returned here
   - `:error`: in the case of an error, the exception is returned here."
   [{:keys [forms eval-form]
     :as ctxt}]

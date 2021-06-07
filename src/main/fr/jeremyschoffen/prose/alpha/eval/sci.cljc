@@ -19,8 +19,10 @@ Api providing tools to facilitate the evaluation of documents using Sci.
 
 
 (def sci-opt-println
-  "Sci option map containing values for the `:namespaces` key that allows in the clojurescript case to redefine
-  sci own `'clojure.core/println` to `cljs.core/println`. Using this map to cretes sci context in cojure does nothing."
+  "Sci option map containing values for the `:namespaces` key that allows in
+  the clojurescript case to redefine sci's own `'clojure.core/println` to
+  `cljs.core/println`. Using this map when creating sci contexts in clojure
+  does nothing."
   {:namespaces #?(:clj {}
                   :cljs {'clojure.core {'println println}})})
 

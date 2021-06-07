@@ -92,7 +92,7 @@ Api providing generic compilation utilities.
 (def ^:dynamic *implementation*
   "Map containing the default functions of a compiler implementation.
 
-  It has 3 keys:
+  It has 4 keys:
   - `:name`: the name of the implementation (a keyword)
   - `:default-emit-str!`: function that compiles plain text. The escaping logic is intended to live here.
   - `:default-emit-tag!`: function that compiles a regular tag.

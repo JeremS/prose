@@ -22,9 +22,12 @@ Api providing tools to facilitate the evaluation of documents using Sci.
   "Sci option map containing values for the `:namespaces` key that allows in
   the clojurescript case to redefine sci's own `'clojure.core/println` to
   `cljs.core/println`. Using this map when creating sci contexts in clojure
-  does nothing."
+  does nothing.
+
+  This map is meant to be deep-merged into the options passed to [[init]]"
   {:namespaces #?(:clj {}
                   :cljs {'clojure.core {'println println}})})
+
 
 (defn init
   "Create a sci evaluation context.
@@ -61,10 +64,17 @@ Api providing tools to facilitate the evaluation of documents using Sci.
 ;;----------------------------------------------------------------------------------------------------------------------
 ;; Utilities
 ;;----------------------------------------------------------------------------------------------------------------------
+(defn fork-sci-ctxt
+  "Alias for [[sci.core/fork]]"
+  [sci-ctxt]
+  (sci/fork sci-ctxt))
+
+
 (defn sci-ctxt->sci-eval
   "Make an eval function from an sci context.
 
-  The result is a function of one argument, a form to be evaluated by sci in the evaluation context `ctxt`."
+  The result is a function of one argument, a `form` to be evaluated by sci in
+  the evaluation context `ctxt`."
   [ctxt]
   (fn [form]
     (sci/eval-form ctxt form)))

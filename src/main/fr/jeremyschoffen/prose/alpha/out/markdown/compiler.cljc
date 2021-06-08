@@ -55,6 +55,11 @@ to compile to markdown.
 ;;----------------------------------------------------------------------------------------------------------------------
 (derive ::md ::html-cplr/html)
 
+(defn emit-tag! [t]
+  (binding [common/*implementation* (assoc common/*implementation*
+                                           :default-emit-str!
+                                           html-cplr/emit-str!)]
+    (html-cplr/emit-tag! t)))
 
 (def implementation
   "Markdown implementation of our generic compiler, this is meant to a binding to
@@ -62,13 +67,14 @@ to compile to markdown.
   [[fr.jeremyschoffen.prose.alpha.out.html.compiler/implementation]]."
   (assoc html-cplr/implementation
     :name ::md
-    :default-emit-str! common/emit!))
+    :default-emit-str! common/emit!
+    :default-emit-tag! emit-tag!))
 
 
 (defn compile! [doc]
   (common/text-environment
     (common/with-implementation implementation
-                                (common/emit-doc! doc))))
+      (common/emit-doc! doc))))
 
 
 (comment

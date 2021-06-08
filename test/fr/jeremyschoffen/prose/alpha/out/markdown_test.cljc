@@ -39,9 +39,17 @@
          "```text\n(-> 1 (inc))\n```")))
 
 
-(deftest not-escaping
-  (is (= (cplr/compile! ">")
-         ">")))
+(deftest escaping-rules
+  (testing "characters are not escapded in normal md"
+    (is (= (cplr/compile! ">") ">")))
+
+  (testing "characters are escaped inside regular html"
+    (is (= (cplr/compile!
+             ["<>" (tags/p "<>")])
+           "<><p>&lt;&gt;</p>")))
+
+  (testing "charaters aren't escaped in markdown tags"))
+
 
 
 (deftest comments

@@ -123,12 +123,18 @@ to compile to html.
 (derive ::html ::common/default)
 
 
+(defn emit-str!
+  "Default emit-str for the HTML compiler. Uses [[xml-str]] to escaped characters."
+  [x]
+  (emit! (xml-str x)))
+
+
 (def implementation
   "Html implementation of our generic compiler, this is meant to a binding to
   [[fr.jeremyschoffen.prose.alpha.compilation.core]]."
   (assoc common/*implementation*
     :name ::html
-    :default-emit-str! #(emit! (xml-str %))
+    :default-emit-str! emit-str!
     :default-emit-tag! emit-tag!))
 
 
@@ -142,4 +148,4 @@ to compile to html.
 
 (comment
   (compile! [(tags/html5-dtd)  "toto" "titi" (tags/comment "<some--> " "comment") {:tag :div :content ["content"]}])
-  (compile! (tags/div (tags/<> "text"))))
+  (compile! (tags/div (tags/<> "<text"))))

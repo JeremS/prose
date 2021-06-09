@@ -81,8 +81,8 @@ Api providing tools to facilitate the evaluation of documents.
 (defn evaluate
   "Evaluate a sequence of forms in order. Returns the sequence of evaluations.
 
-  To do so an evaluation context is created using [[make-evaluation-ctxt]]. This context is passed to 
-  [[evaluate-ctxt]] that has been wrapped with `middleware`.
+  To do so an evaluation context is created using [[make-evaluation-ctxt]]. This
+  context is passed to [[evaluate-ctxt]] that has been wrapped with `middleware`.
 
   Args:
   - `ef`: an 'evaluate-form' function that take 1 form and returns the result of evaluating it.
@@ -190,10 +190,11 @@ Api providing tools to facilitate the evaluation of documents.
 (defn wrap-eval-in-temp-ns
   "Middleware that makes the evaluation take place in a temporary namespace."
   ([eval-ctxt]
-   (wrap-eval-in-temp-ns eval-ctxt (gensym "temp_ns__")))
+   (wrap-eval-in-temp-ns eval-ctxt nil))
   ([eval-ctxt temp-ns]
    (fn [{:keys [eval-form] :as ctxt}]
-     (let [res (do
+     (let [temp-ns (or temp-ns (gensym "temp_ns__"))
+           res (do
                  (switch-to-temp-ns eval-form temp-ns)
                  (eval-ctxt ctxt))]
        (remove-temp-ns eval-form temp-ns)

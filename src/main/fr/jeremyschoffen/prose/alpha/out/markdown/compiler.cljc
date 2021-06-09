@@ -56,9 +56,9 @@ to compile to markdown.
 (derive ::md ::html-cplr/html)
 
 (defn emit-tag! [t]
-  (binding [common/*implementation* (assoc common/*implementation*
-                                           :default-emit-str!
-                                           html-cplr/emit-str!)]
+  (common/with-implementation (assoc common/*implementation*
+                                     :default-emit-str!
+                                     html-cplr/emit-str!)
     (html-cplr/emit-tag! t)))
 
 (def implementation

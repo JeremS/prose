@@ -5,8 +5,7 @@
     [fr.jeremyschoffen.mbt.alpha.default :as mbt-defaults]
     [fr.jeremyschoffen.mbt.alpha.mbt-style :as mbt-build]
     [fr.jeremyschoffen.mbt.alpha.utils :as u]
-    [fr.jeremyschoffen.prose.alpha.docs.core :as docs]
-    [build :refer [token]]))
+    [fr.jeremyschoffen.prose.alpha.docs.core :as docs]))
 
 
 (u/pseudo-nss
@@ -44,8 +43,7 @@
                         ::project/maven-coords mbt-defaults/deps-make-maven-coords)
       (assoc-in [::git/commit! ::git.commit/message] "Generated the docs.")
       (mbt-defaults/generate-then-commit!
-        (u/do-side-effect! docs/make-readme!)
-        (u/do-side-effect! docs/make-design-docs!))))
+        (u/do-side-effect! docs/make-readme!))))
 
 
 (u/spec-op generate-docs!
@@ -78,6 +76,10 @@
                  mbt-build/install!
                  mbt-build/deploy!])
 
+
+(def clojars-token (requiring-resolve 'build/token))
+
+
 (comment
   (mbt-core/clean! conf)
 
@@ -90,5 +92,5 @@
 
   (-> conf
       (assoc ::maven/credentials {::maven.credentials/user-name "jeremys"
-                                  ::maven.credentials/password token})
+                                  ::maven.credentials/password (@clojars-token)})
       mbt-build/deploy!))

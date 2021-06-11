@@ -15,7 +15,8 @@
       (apply f args)
       (catch Exception e
         (throw (ex-info (str "Error making the document during : " phase)
-                        {:phase phase}
+                        {:phase phase
+                         :args args}
                         e))))))
 
 

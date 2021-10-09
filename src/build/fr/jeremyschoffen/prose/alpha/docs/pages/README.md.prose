@@ -95,7 +95,7 @@ There are some helpers to make this process easier:
 
 (def evaluate (doc/make-evaluator {:slurp-doc slurp-doc
                                    :read-doc reader/read-from-string
-                                   :eval-doc eval-common/eval-forms-in-temp-ns}))
+                                   :eval-forms eval-common/eval-forms-in-temp-ns}))
 (-> "fr/jeremyschoffen/prose/alpha/docs/pages/readme/example-doc.html.prose"
   evaluate
   html-compiler/compile!)

@@ -6,15 +6,15 @@ Alternate syntax for Clojure, similar to what [Pollen](https://github.com/mbutte
 ## Installation
 Deps coords:
 ```clojure
-{fr.jeremyschoffen/prose-alpha {:mvn/version "30"}}
+{fr.jeremyschoffen/prose-alpha {:mvn/version "32"}}
 ```
 Lein coords:
 ```clojure
-[fr.jeremyschoffen/prose-alpha "30"]
+[fr.jeremyschoffen/prose-alpha "32"]
 ```
 Git coords:
 ```clojure
-{fr.jeremyschoffen/prose-alpha {:git/url "https://github.com/JeremS/prose.git", :sha "5e2c686cc723b474877193ab2d5d78317de320af"}}
+{fr.jeremyschoffen/prose-alpha {:git/url "https://github.com/JeremS/prose.git", :sha "880566d0f12400cdc1b9948e86fcb3fc1d59ba30"}}
 ```
 
 
@@ -205,7 +205,7 @@ There are some helpers to make this process easier:
 
 (def evaluate (doc/make-evaluator {:slurp-doc slurp-doc
                                    :read-doc reader/read-from-string
-                                   :eval-doc eval-common/eval-forms-in-temp-ns}))
+                                   :eval-forms eval-common/eval-forms-in-temp-ns}))
 (-> "fr/jeremyschoffen/prose/alpha/docs/pages/readme/example-doc.html.prose"
   evaluate
   html-compiler/compile!)

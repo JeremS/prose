@@ -10,7 +10,7 @@
 
  :aliases {:clj {:extra-deps {org.clojure/clojure {:mvn/version "1.11.1"}}}
 
-           :cljs {:extra-deps {org.clojure/clojurescript {:mvn/version "1.10.866"}}}
+           :cljs {:extra-deps {org.clojure/clojurescript {:mvn/version "1.11.60"}}}
 
            :dev {:extra-paths ["dev"]}
 

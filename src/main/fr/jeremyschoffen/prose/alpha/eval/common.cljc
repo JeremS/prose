@@ -216,7 +216,7 @@ Api providing tools to facilitate the evaluation of documents.
   ([eval-form forms]
    (evaluate eval-form wrap-eval-forms forms)))
 
-
+#_{:clj-kondo/ignore [:unresolved-symbol]}
 (comment
   (eval-forms '[(println *ns*)
                 (ns foobar)

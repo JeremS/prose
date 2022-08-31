@@ -236,7 +236,7 @@ Api providing several tools to use inside or outside of prose document.
                     :error-msg "Error requiring doc."})))
 
 
-
+#_{:clj-kondo/ignore [:unresolved-symbol]}
 (comment
   (eval-common/bind-env {:prose.alpha.document/input {:some :input}}
                         (eval-common/eval-forms-in-temp-ns

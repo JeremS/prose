@@ -44,7 +44,7 @@
    g/tag-text-arg-text
    "text without embedded code nor braces"})
 
-
+#_{:clj-kondo/ignore [:unresolved-symbol :unresolved-var]}
 (defn get-normalized-error-data [e]
   (letfn [(extract-reason [insta-reason]
             (m/search insta-reason
@@ -132,9 +132,8 @@
         (println "From indexes" start-index "to" end-index)
         (println "line" start-line "column" start-column
                  "to line" end-line "column" end-column))
-      (do
-        (println "Around index" end-index
-                 "line" end-line "column" end-column)))))
+      (println "Around index" end-index
+               "line" end-line "column" end-column))))
 
 
 (defn print-failed-text [e]
@@ -142,6 +141,7 @@
   (println (-> e ex-data :text)))
 
 
+#_{:clj-kondo/ignore [:unresolved-symbol]}
 (macro/replace
   #?(:clj {}
      :cljs {*out* *print-fn*

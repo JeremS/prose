@@ -27,6 +27,8 @@ The different syntactic elements are processed as follows:
 ;;----------------------------------------------------------------------------------------------------------------------
 ;; Parsing and reading
 ;;----------------------------------------------------------------------------------------------------------------------
+
+#_{:clj-kondo/ignore [:unresolved-var]}
 (defn parse
   "Wrapper around the parser from [[textp.reader.grammar]] adding error handling."
   [text]
@@ -73,9 +75,10 @@ The different syntactic elements are processed as follows:
 (declare clojurize)
 
 
-(defn extract-tags [content]
+(defn extract-tags
   "Replaces the tags by generated unique symbols and creates a mapping from
   those symbols to the replaced tag data."
+  [content]
   (let [env (volatile! (transient {}))
         form (volatile! (transient []))]
 

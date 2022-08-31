@@ -38,7 +38,7 @@ API providing evaluation tools to evaluate document using Sci.
   "Alias for the function [[fr.jeremyschoffen.prose.alpha.document.common.evaluator/make]]"
   evaluator/make)
 
-
+#_{:clj-kondo/ignore [:unresolved-symbol]}
 (comment
   (require '[clojure.java.io :as io])
   (require '[fr.jeremyschoffen.prose.alpha.reader.core :as reader])

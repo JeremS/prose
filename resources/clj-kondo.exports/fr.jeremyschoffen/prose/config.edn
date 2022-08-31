@@ -1,0 +1,2 @@
+{:hooks
+ {:analyze-call {}}}

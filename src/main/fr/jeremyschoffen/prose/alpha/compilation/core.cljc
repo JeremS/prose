@@ -45,6 +45,7 @@ Api providing generic compilation utilities.
 ;;----------------------------------------------------------------------------------------------------------------------
 ;; Stringbuffer implementation
 ;;----------------------------------------------------------------------------------------------------------------------
+#_{:clj-kondo/ignore [:unresolved-symbol]}
 (macro/case
   :clj (defn text-output
          "Create a text output intended to be a possible binding for [[*compilation-out*]] using
@@ -59,9 +60,10 @@ Api providing generic compilation utilities.
              (append! [_ text]
                (.append builder text)))))
 
-  :cljs (defn text-output []
+  :cljs (defn text-output
           "Create a text output intended to be a possible binding for [[*compilation-out*]] using
          a `goog.string StringBuffer`."
+          []
           (let [builder (StringBuffer.)]
             (specify! builder
               Output

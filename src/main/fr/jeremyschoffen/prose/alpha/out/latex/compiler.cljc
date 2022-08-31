@@ -3,7 +3,7 @@
 Specialization of the generic compiler from [[fr.jeremyschoffen.prose.alpha.compilation.core]]
 to compile to LaTeX.
 
-Very, don't use it yet.
+Very young, don't use it yet.
 "}
   fr.jeremyschoffen.prose.alpha.out.latex.compiler
   (:require

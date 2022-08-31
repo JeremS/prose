@@ -161,6 +161,8 @@
 ;; ---------------------------------------------------------------------------------------------------------------------
 ;; Grammar
 ;; ---------------------------------------------------------------------------------------------------------------------
+
+#_{:clj-kondo/ignore [:unresolved-var]}
 (def enclosed-g
   "Grammatical describing text enclosed in balanced marker: quotes, parenthesis..;"
   {:verbatim-string (gu/enclosed (-> double-quote instac/string instac/hide)
@@ -188,6 +190,7 @@
                                 (instac/nt :embedded))})
 
 
+#_{:clj-kondo/ignore [:unresolved-var]}
 (def general-g
   "The general grammar, tying the lexer and the enclosed rules together with the top grammatical rules."
   (instac/ebnf

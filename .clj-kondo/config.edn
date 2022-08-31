@@ -1,0 +1,8 @@
+{:config-paths ["../resources/clj-kondo.exports/fr.jeremyschoffen/prose"]
+ :lint-as
+ {fr.jeremyschoffen.prose.alpha.reader.grammar.utils/def-regex clojure.core/def
+  fr.jeremyschoffen.prose.alpha.document.lib/def-s clojure.core/def
+  fr.jeremyschoffen.prose.alpha.document.lib/defn-s clojure.core/defn
+  fr.jeremyschoffen.prose.alpha.document.lib/defmacro-s clojure.core/defmacro
+  fr.jeremyschoffen.prose.alpha.document.lib/def-xml-tag clojure.core/def}}
+

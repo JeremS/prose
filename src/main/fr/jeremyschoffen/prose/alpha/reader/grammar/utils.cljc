@@ -40,6 +40,7 @@
   [:* (into [:not] forbidden)])
 
 
+#_{:clj-kondo/ignore [:unresolved-var]}
 (defn enclosed
   "Make a grammatical describing text enclosed in balanced delimiters."
   [open-rule close-rule & enclosed]
@@ -49,6 +50,7 @@
     close-rule))
 
 
+#_{:clj-kondo/ignore [:unresolved-var]}
 (defn hide-tags-all
   "Hide all tags of a grammar."
   [g]
@@ -64,6 +66,7 @@
       (->> (merge g))))
 
 
+#_{:clj-kondo/ignore [:unresolved-var]}
 (defn hide-all
   "Hide all productions of a grammar."
   [g]

@@ -1,6 +1,6 @@
 (ns ^{:author "Jeremy Schoffen"
       :doc "
-API providing evaluation tools to evaluate document using Clojure's environment.
+API providing evaluation tools to evaluate documents using Clojure's environment.
 "}
   fr.jeremyschoffen.prose.alpha.document.clojure
   (:require

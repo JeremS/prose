@@ -21,6 +21,7 @@
       (cond-> (macro? v) (vary-meta assoc :sci/macro true))))
 
 
+#_{:clj-kondo/ignore [:unresolved-symbol :unresolved-var]}
 (defn publics->bindings
   "Make a sci bindings map from the result of a `ns-publics` result.
 
@@ -40,6 +41,7 @@
   `(publics->bindings (ns-publics '~n)))
 
 
+#_{:clj-kondo/ignore [:unresolved-symbol :unresolved-var]}
 (defmacro make-ns-bindings
   "Make a namespaces bindings map.
   Typically used as `(sci/init {:namespaces (make-ns-bindings ns1 ns2)})`."
@@ -50,6 +52,7 @@
                        (`bindings !ns'))))
 
 
+#_{:clj-kondo/ignore [:unresolved-symbol]}
 (comment
   (macroexpand-1 '(make-ns-bindings fr.jeremyschoffen.textp.alpha.lib.core))
   (make-ns-bindings fr.jeremyschoffen.prose.alpha.lib.core))

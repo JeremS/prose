@@ -1,0 +1,22 @@
+(ns clj-kondo.prose.alpha.document.lib
+  (:require
+    [clj-kondo.hooks-api :as api]))
+
+
+(defn make-def [x]
+  (let [[sym kw] (if (vector? x) x [x])
+        res (cond-> [(api/token-node 'fr.jeremyschoffen.prose.alpha.document.lib/def-xml-tag)
+                     (api/token-node sym)]
+              kw (conj (api/token-node kw)))]
+    (api/list-node res)))
+
+
+(defn def-xml-tags [{:keys [node] :as p}]
+  (let [defs (->> node
+                  api/sexpr
+                  rest
+                  (map make-def))
+        res (api/list-node
+              (cons (api/token-node 'do)
+                    defs))]
+    (assoc p :node res)))

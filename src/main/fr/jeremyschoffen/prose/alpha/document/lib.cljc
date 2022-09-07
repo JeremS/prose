@@ -7,7 +7,8 @@ Api providing several tools to use inside or outside of prose document.
     #?(:clj [clojure.spec.alpha :as s]
        :cljs [cljs.spec.alpha :as s :include-macros true])
 
-    [fr.jeremyschoffen.prose.alpha.eval.common :as eval-common]))
+    [fr.jeremyschoffen.prose.alpha.eval.common :as eval-common]
+    [hyperfiddle.rcf :refer [tests]]))
 
 
 ;;----------------------------------------------------------------------------------------------------------------------
@@ -122,17 +123,22 @@ Api providing several tools to use inside or outside of prose document.
        (apply xml-tag ~keyword-name args#))))
 
 
-(comment ; clj only
+(tests ; clj only
   (macroexpand-1 '(def-xml-tag div))
 
   (def-xml-tag div)
 
 
-  (div)
-  (div {})
-  (div "content")
-  (div {} "content")
-  (div (div) (div) (div)))
+  (div) := {:type :tag :tag :div}
+  (div {}) := {:tag :div :attrs {} :type :tag}
+  (div "content") := {:tag :div :content ["content"] :type :tag}
+  (div {} "content") := {:tag :div, :attrs {}, :content ["content"], :type :tag}
+  (div (div) (div) (div)) := {:tag :div,
+                              :content
+                              [{:tag :div, :type :tag}
+                               {:tag :div, :type :tag}
+                               {:tag :div, :type :tag}],
+                              :type :tag})
 
 
 (defmacro def-xml-tags [& tags]
@@ -143,6 +149,80 @@ Api providing several tools to use inside or outside of prose document.
              `(def-xml-tag ~sym ~kw)
              `(def-xml-tag ~sym))))))
 
+
+(defn attr->set
+  "Turn the string value of an html tag attribute into a set of strings
+  (like the value class attribute)."
+  [s]
+  (set (re-seq #"\S+" s)))
+
+
+(defn set->attr
+  "Turn a set of strings/keywords into a string to be used as the value of an html tag attribute
+  (like the class attribute)."
+  [s]
+  (apply str (interpose \space s)))
+
+
+(defn add-classes [t classes]
+  (let [current (-> t
+                    (get-in [:attrs :class] "")
+                    attr->set)
+        new (into current (map name) classes)]
+    (assoc-in t [:attrs :class] (set->attr new))))
+
+
+(defn make-mixed-in
+  "Make a tag constructor that injects some css classes.
+
+  Args:
+  - `cstr`: a tag constructor (defined with [[def-xml-tag]] for instance)
+  - `classes`: a sequence of css classes names, can be string or keywords
+
+  ex:
+  (def container (make-mixed-in div [:container]))
+  (container \"some text\")
+
+  :=> {:tag :div :attrs {:classes \"container\"} :content \"some text\"}
+  "
+  [cstr classes]
+  (let [{::keys [added-classes original-cstr]
+         :or {added-classes #{}
+              original-cstr cstr}}(meta cstr)
+        classes (into added-classes classes)]
+    (with-meta
+      (comp #(add-classes % classes) original-cstr)
+      {::added-classes classes
+       ::original-cstr original-cstr})))
+
+
+(tests
+  "Testing the mixed in helpers."
+
+  (attr->set "") := #{}
+  (attr->set "container grid col-2") := #{"grid" "col-2" "container"}
+  (set->attr (attr->set "container grid col-2")) := "grid col-2 container"
+
+
+  (def-xml-tag div)
+  (def container (make-mixed-in div #{:container}))
+  (def container-grid (make-mixed-in container ["grid"]))
+
+  (container {:class "toto"} "contained") := {:tag :div,
+                                              :attrs {:class "toto container"},
+                                              :content ["contained"],
+                                              :type :tag}
+
+  (container-grid {:class "titi"}"contaited 2") := {:tag :div,
+                                                    :attrs {:class "grid titi container"},
+                                                    :content ["contaited 2"],
+                                                    :type :tag}
+
+  (meta container) := {::added-classes #{:container}
+                       ::original-cstr div}
+
+  (meta container-grid) := {::added-classes #{"grid" :container},
+                            ::original-cstr div})
 
 ;;----------------------------------------------------------------------------------------------------------------------
 ;; Default tags
@@ -252,18 +332,18 @@ Api providing several tools to use inside or outside of prose document.
   (require '[clojure.java.io :as io])
   (require '[fr.jeremyschoffen.prose.alpha.reader.core :as reader])
 
-  (def load-doc (fn [path]
+
+  (def slurp-doc (fn [path]
                   (-> path
                       io/resource
-                      slurp
-                      reader/read-from-string)))
+                      slurp)))
 
-  (eval-common/bind-env {:prose.alpha.document/load-doc load-doc
-                         :prose.alpha.document/eval-doc eval-common/eval-forms-in-temp-ns}
+  (eval-common/bind-env {:prose.alpha.document/slurp-doc slurp-doc
+                         :prose.alpha.document/read-doc reader/read-from-string
+                         :prose.alpha.document/eval-forms eval-common/eval-forms-in-temp-ns}
                         (-> "complex-doc/master.prose"
                             load-doc
                             eval-common/eval-forms-in-temp-ns)))
-
 
 
 

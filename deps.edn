@@ -5,8 +5,8 @@
         meander/epsilon          {:mvn/version "0.0.650"}
         medley/medley            {:mvn/version "1.4.0"}
         net.cgrand/macrovich     {:mvn/version "0.2.1"}
-        lambdaisland/regal       {:mvn/version "0.0.143"}}
-
+        lambdaisland/regal       {:mvn/version "0.0.143"}
+        com.hyperfiddle/rcf      {:mvn/version "20220902-130636"}}
 
  :aliases {:clj {:extra-deps {org.clojure/clojure {:mvn/version "1.11.1"}}}
 

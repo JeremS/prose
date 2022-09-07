@@ -1,7 +1,12 @@
 (ns dev
   (:require
     [cljs.repl.node :as node]
-    [cider.piggieback :as piggie]))
+    [cider.piggieback :as piggie]
+    [hyperfiddle.rcf :as rcf]))
+
+
+
+(rcf/enable!)
 
 (defn start-node-repl []
   (piggie/cljs-repl (node/repl-env)))

@@ -1,12 +1,6 @@
 
 
 
-
-
-
-
-
-
 # Evaluation model
 
 Prose provides tools in the `fr.jeremyschoffen.prose.alpha.eval` namespace to
@@ -63,7 +57,7 @@ Using eval on this vector is problematic:
 ```clojure
 
   (try
-    (-> "readme/example-doc.html.prose"
+    (-> "prose/alpha/readme/example-doc.html.prose"
      lib/slurp-doc
      lib/read-doc
      eval)

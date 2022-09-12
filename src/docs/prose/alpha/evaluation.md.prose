@@ -1,0 +1,190 @@
+◊(require
+   '[clojure.pprint :as pp]
+   '[docs.alpha.tags :as t]
+   '[fr.jeremyschoffen.prose.alpha.document.lib :as lib]
+   '[fr.jeremyschoffen.prose.alpha.eval.common :as eval-common]
+   '[fr.jeremyschoffen.prose.alpha.eval.sci :as eval-sci]
+   '[fr.jeremyschoffen.prose.alpha.out.markdown.tags :as md]
+   '[fr.jeremyschoffen.prose.alpha.reader.core :as reader])
+
+
+# Evaluation model
+
+Prose provides tools in the `fr.jeremyschoffen.prose.alpha.eval` namespace to
+evaluate Clojure code. There are several things to take into account, just
+using `eval` on 'code as data' isn't sufficient.
+
+
+## Considerations
+At the moment, the main use case of prose is the creation of programmable
+documents by embedding Clojure inside them. In other words we want documents as
+Clojure programs.
+
+The basic idea we cover here works in three phases:
+- turn prose text into 'Clojure code as data' using our reader
+- use Clojure's evaluation mechanism to evaluate this 'code as data'.
+  The result of this evaluation is treated as data representing the final
+  document (we tend to use enlive style trees).
+- compile the tree to a compilation target, HTML for instance.
+
+The eval part of this algorithm presents challenges that we explore here.
+
+### Naive evaluation and `require`
+Directly using the `eval` function on the data returned by our reader has
+issues.
+
+For instance the document:
+◊t/clojure-sample {readme/example-doc.html.prose}
+
+is read as:
+◊t/clj{
+  ◊(-> "prose/alpha/readme/example-doc.html.prose"
+     lib/slurp-doc
+     lib/read-doc
+     pp/pprint
+     with-out-str)
+}
+
+Using eval on this vector is problematic:
+◊t/code {
+  (try
+    (-> "prose/alpha/readme/example-doc.html.prose"
+     lib/slurp-doc
+     lib/read-doc
+     eval)
+    (catch Exception e
+      (-> e .getCause .getMessage)))
+}
+
+This is a classic problem, requiring a namespace and using it in the same
+evaluation is a no go in Clojure. To solve this, we can evaluate each element
+in sequence and return the sequence of evaluations. It doesn't solve all
+possible cases but it seems sufficient for most uses.
+
+
+### Evaluation and namespaces interactions
+Since we use eval, a lot of things can happen.
+
+When it comes to Clojure namespaces in particular:
+- Every var definition in made in the document will be added to the namespace
+  from which the document is evaluated. One problem that can arise is that we
+  can accidentally redefine vars that way.
+- When evaluating several documents, all definitions made in documents could
+  stack up in the same namespace and again interfere with each other.
+- If for some reason the document uses code that changes the current namespace,
+  it changes the current namespace for the code evaluating it.
+
+To mitigate these types of issues our tools allow for the evaluation of
+documents in ephemeral namespaces. The idea here is to create an new namespace
+with a random name for each document evaluation. We can then switch to it, evaluate
+the document, switch back and delete it. Unless code inside the document uses
+something like `in-ns` or the `ns` macro, no definition made inside the document
+should pollute the original namespace.
+
+The use of Sci can is also a solution to these kind of problems since it allows
+the creation of isolated evaluation environments.
+
+### Multi-threading
+We may want to evaluate several documents in parallel. However it seems like the
+Clojure namespace machinery isn't meant to be used from several threads.
+
+See:
+◊t/code {
+  (try
+    (deref (future (lib/eval-doc '[(+ 1 1)(+ 1 2)])))
+    (catch Exception e
+      (-> e ex-cause ex-cause ex-cause ex-message)))
+}
+
+Since we want to use ephemeral namespaces this is a problem for a pure Clojure
+evaluation scheme. Sci is an interesting solution to get around this limitation.
+
+
+## The current evaluation toolkit.
+At this time evaluating documents is similar to evaluating a script. A document
+is read as a sequences Clojure forms. We then want to evaluate these forms in
+order. To implement this scheme and provide solutions to the above
+considerations prose provides an evaluation model inspired by the ring spec
+in the ◊t/sym[eval-common] namespace.
+
+### Basics
+As the ring model uses a map to represent a web request, we use a map to represent
+an evaluation. Such maps are constructed with the
+◊t/sym[eval-common/make-evaluation-ctxt] function.
+◊(t/source eval-common/make-evaluation-ctxt)
+
+The evaluation proper is realized by the ◊t/sym[eval-common/evaluate-ctxt]:
+◊(t/source eval-common/evaluate-ctxt)
+
+Note that forms are evaluated in sequence using ◊t/sym[eval-common/eval-forms*]:
+◊(t/source eval-common/eval-forms*)
+
+This prevent the usual cases of problems that could happen with using `require`
+inside of documents.
+
+The ◊t/sym[eval-common/evaluate] function is provided as a helper to tie this model together:
+◊(t/source eval-common/evaluate)
+
+
+The rest of the ◊t/sym[eval-common] namespace provides
+tools that answer our other considerations in the form of middleware for the
+◊t/sym[eval-common/evaluate-ctxt] context function.
+
+
+### Error management
+We have already seen that ◊t/sym[eval-common/evaluate-ctxt] returns the
+evaluation context with either an added `:result` or `:error` keys. The
+middleware ◊t/sym[eval-common/wrap-eval-result] may be used to transform
+◊t/sym[eval-common/evaluate-ctxt] into a function that either returns the result
+of an evaluation or throws an exception.
+◊(t/source eval-common/wrap-eval-result)
+
+
+### Ephemeral namespaces
+The ephemeral namespace behavior is provided by the use of two different
+middleware:
+- ◊t/sym[eval-common/wrap-snapshot-ns] makes sure that the current namespace
+  after the evaluation is the same as before:
+◊(t/source eval-common/wrap-snapshot-ns)
+
+- ◊t/sym[eval-common/wrap-eval-in-temp-ns] creates an ephemeral namespace, makes
+  it the current one, evaluates code then deletes it:
+◊(t/source eval-common/wrap-eval-in-temp-ns)
+
+### Generality of the model
+This whole execution model takes an `eval-form` function as a parameter.
+For instance here is ◊t/sym[eval-common/eval-forms-in-temp-ns]:
+◊(t/source eval-common/eval-forms-in-temp-ns)
+
+Using anything other than the default `eval` provided by Clojure is possible.
+Although not implemented here, we could use this in self-hosted ClojureScript
+and that's what we do with sci. Take a look at the
+◊t/sym[eval-sci/eval-forms-in-temp-ns] function:
+◊(t/source eval-sci/eval-forms-in-temp-ns)
+
+We can see that this function uses the machinery provided by the common
+namespace (the last line of code). The `eval-form` function used named `ef` is
+created with:
+◊(t/source eval-sci/sci-ctxt->sci-eval)
+
+
+### Multi-threading, Sandboxing... Sci
+Sci is interesting in this project for different reasons. For instance, where
+the Clojure version failed, with Sci we can do:
+◊t/code {
+(deref (future (eval-sci/eval-forms '[(+ 1 1)(+ 1 2)])))
+}
+
+We can evaluate code in ClojureScript without having to go self hosted.
+
+The fact that it allows us to reify execution environments (and fork them
+cheaply) opens a lot of possibilities up. Evaluations can occur on any number
+of threads while being in their own sandboxed environments forked from a
+common one.
+
+Also I believe that using Sci carrefully, allows us not to take too big a
+performance hit. Only code declared inside documents is going to be
+interpreted by Sci. Functions that a document uses and that come from
+the environment (the one created with sci.core/init) are Clojure functions
+and I believe run directly as Clojure code.
+

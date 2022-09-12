@@ -1,12 +1,6 @@
 
 
 
-
-
-
-
-
-
 # Compiling documents
 Prose provides APIs to compile data to text. The general idea being that the
 result of reading then evaluating a document is data that can be compiled. The
@@ -57,9 +51,10 @@ a `StringBuilder` in java and a `StringBuffer` in javascript:
              (append! [_ text]
                (.append builder text)))))
 
-  :cljs (defn text-output []
+  :cljs (defn text-output
           "Create a text output intended to be a possible binding for [[*compilation-out*]] using
          a `goog.string StringBuffer`."
+          []
           (let [builder (StringBuffer.)]
             (specify! builder
               Output

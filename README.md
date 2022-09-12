@@ -4,19 +4,9 @@
 Alternate syntax for Clojure, similar to what [Pollen](https://github.com/mbutterick/pollen) brings to [Racket](https://racket-lang.org/).
 
 ## Installation
-Deps coords:
 ```clojure
-{fr.jeremyschoffen/prose-alpha {:mvn/version "32"}}
+{io.github.jerems/prose {:git/tag "v78", :git/sha "6373376862"}}
 ```
-Lein coords:
-```clojure
-[fr.jeremyschoffen/prose-alpha "32"]
-```
-Git coords:
-```clojure
-{fr.jeremyschoffen/prose-alpha {:git/url "https://github.com/JeremS/prose.git", :sha "880566d0f12400cdc1b9948e86fcb3fc1d59ba30"}}
-```
-
 
 ## Usage
 The main idea is to have programmable documents in Clojure. To do so, Prose

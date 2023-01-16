@@ -5,7 +5,7 @@ Alternate syntax for Clojure, similar to what [Pollen](https://github.com/mbutte
 
 ## Installation
 ```clojure
-{io.github.jerems/prose {:git/tag "v78", :git/sha "6373376862"}}
+{io.github.jerems/prose {:git/tag "v81", :git/sha "352c4d01cf"}}
 ```
 
 ## Usage

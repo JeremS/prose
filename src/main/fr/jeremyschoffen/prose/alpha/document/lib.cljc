@@ -51,10 +51,22 @@ Api providing several tools to use inside or outside of prose document.
     res))
 
 
+(defn tag? [x]
+  (and (map? x)
+       (contains? x :type)
+       (contains? x :tag)))
+
+(tests
+  (tag? {}) := false
+  (tag? {:type "text/css"}) := false
+  (tag? {:tag :link}) := false
+  (tag? {:tag :link :type :tag}) := true)
+
+
 (defn tag-type
   "Returns the type of a tag `x` or nil isn't a map or doesn't have a type."
   [x]
-  (when (map? x)
+  (when (tag? x)
     (:type x)))
 
 
@@ -65,7 +77,7 @@ Api providing several tools to use inside or outside of prose document.
     (not= :tag t)))
 
 
-(defn tag?
+(defn normal-tag?
   "Determine if `x` is a normal tag."
   [x]
   (when-let [t (tag-type x)]
@@ -74,7 +86,7 @@ Api providing several tools to use inside or outside of prose document.
 
 (s/def ::xml-tag (s/cat :tag keyword?
                         :attrs (s/? (every-pred map?
-                                                (complement (some-fn special? tag?))))
+                                                (complement tag?)))
                         :content (s/* any?)))
 
 (defn xml-tag
@@ -98,6 +110,10 @@ Api providing several tools to use inside or outside of prose document.
   (->  (conform-or-throw ::xml-tag args)
        (assoc :type :tag)))
 
+(tests
+  (xml-tag :link {:type "text/css"}) := {:tag :link
+                                         :attrs {:type "text/css"}
+                                         :type :tag})
 
 (s/def ::def-xml-tag
   (s/cat :name symbol?

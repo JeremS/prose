@@ -6,6 +6,7 @@
 
 
 (lib/def-xml-tag div :div)
+(lib/def-xml-tag link)
 
 (deftest tag-constructor
   (are [x y] (= x y)
@@ -19,4 +20,8 @@
              {:tag :div, :attrs {:class "toto"} :type :tag}
 
              (div "content")
-             {:tag :div  :content ["content"] :type :tag}))
+             {:tag :div  :content ["content"] :type :tag}
+
+             (link {:rel "stylesheet" :type "text/css" :href "some/path"})
+             {:tag :link :attrs {:rel "stylesheet" :type "text/css" :href "some/path"} :type :tag}))
+

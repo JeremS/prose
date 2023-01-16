@@ -54,5 +54,5 @@
 
 #_{:clj-kondo/ignore [:unresolved-symbol]}
 (comment
-  (macroexpand-1 '(make-ns-bindings fr.jeremyschoffen.textp.alpha.lib.core))
-  (make-ns-bindings fr.jeremyschoffen.prose.alpha.lib.core))
+  (macroexpand-1 '(make-ns-bindings fr.jeremyschoffen.prose.alpha.document.lib))
+  (make-ns-bindings fr.jeremyschoffen.prose.alpha.document.lib))

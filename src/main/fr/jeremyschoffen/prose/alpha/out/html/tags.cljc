@@ -54,7 +54,8 @@ Api containing constructor functions for html tags.
 
 
 (defn dtd [name public-id system-id]
-  {:type :dtd
+  {:tag :special
+   :type :dtd
    :data [name public-id system-id]})
 
 
@@ -67,4 +68,4 @@ Api containing constructor functions for html tags.
 (defn comment
   "A html comment."
   [& args]
-  {:type :comment, :data (vec args)})
+  {:tag :special :type :comment, :data (vec args)})

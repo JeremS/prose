@@ -22,15 +22,16 @@ Api providing tools to facilitate the evaluation of documents.
                         :prose.alpha.evaluation/env-key key})))))
 
 
-(defmacro bind-env
-  "Utility allowing to merge kvs keys to the [[*evaluation-env*]] map.
+#?(:clj
+   (defmacro bind-env
+     "Utility allowing to merge kvs keys to the [[*evaluation-env*]] map.
 
   Args:
   - `bindings`: a map that will be merged into [[*evaluation-env*]].
   - `body`: code to execute in this new environment."
-  [bindings & body]
-  `(binding [*evaluation-env* (merge *evaluation-env* ~bindings)]
-     ~@body))
+     [bindings & body]
+     `(binding [*evaluation-env* (merge *evaluation-env* ~bindings)]
+        ~@body)))
 
 
 (defn wrap-eval-form-exception

@@ -1,4 +1,4 @@
-{:paths ["src/main"]
+{:paths ["src/main" "resources"]
 
  :deps {instaparse/instaparse    {:mvn/version "1.4.12"}
         org.babashka/sci         {:mvn/version "0.3.32"}
